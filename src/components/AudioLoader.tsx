@@ -1,32 +1,42 @@
 import React, { Component } from "react";
-import './AudioLoader.css';
+import "./AudioLoader.css";
 
 interface AudioLoaderProps {
-
+    handleFileLoad(audioBuffer: Promise<AudioBuffer>): void; 
 }
 
-interface AudioLoaderState {
+interface AudioLoaderState {}
 
-}
-
-class AudioLoader extends Component {
+class AudioLoader extends Component<AudioLoaderProps, AudioLoaderState> {
 
     defaultState: AudioLoaderState = {};
-
-    onChangeHandler(e: React.ChangeEvent<HTMLInputElement>) {
-        console.log(e.target.files?.[0]);
-        this.setState({
-            selectedFile: e.target.files?.[0]
-        });
-    }
+    
+    context: AudioContext;
+    fileReader: FileReader;
 
     constructor(props: AudioLoaderProps) {
         super(props);
         this.state = this.defaultState;
+
+        this.fileReader = new FileReader();
+
+        this.fileReader.onloadend = (_: ProgressEvent<FileReader>) => {
+            const buffer = this.fileReader.result as ArrayBuffer;
+            this.context = new AudioContext();
+
+            this.props.handleFileLoad(new Promise(
+                resolve => {
+                    this.context.decodeAudioData(buffer, res => resolve(res));
+                }
+            ));
+        };
     }
 
     render() {
-        return <input type="file" name="file" onChange={this.onChangeHandler}/>;
+        return <input type="file"
+                      name="file"
+                      accept=".wav, .mp3, .m4a, .pcm, .aiff, .aac"
+                      onChange={e => this.fileReader.readAsArrayBuffer(e.target.files?.[0])}/>;
     }
 
 }

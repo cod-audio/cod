@@ -6,7 +6,8 @@
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "react": "^17.0.1",
-    "react-dom": "^17.0.1"
+    "react-dom": "^17.0.1",
+    "waveform-react": "^0.2.3"
   },
   "scripts": {
     "start": "webpack serve",
@@ -16,6 +17,7 @@
   "devDependencies": {
     "css-loader": "^5.0.1",
     "html-webpack-plugin": "^4.5.0",
+    "style-loader": "^2.0.0",
     "ts-loader": "^8.0.11",
     "typescript": "^4.1.2",
     "webpack": "^5.10.0",
