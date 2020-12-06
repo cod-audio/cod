@@ -9,10 +9,10 @@ interface AudioLoaderState {}
 
 class AudioLoader extends Component<AudioLoaderProps, AudioLoaderState> {
 
-    defaultState: AudioLoaderState = {};
-    
     context: AudioContext;
     fileReader: FileReader;
+
+    defaultState: AudioLoaderState = {};
 
     constructor(props: AudioLoaderProps) {
         super(props);

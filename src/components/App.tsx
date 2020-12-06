@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import "./App.css";
 
 import AudioLoader from "./AudioLoader";
+import AudioPlayer from "./AudioPlayer";
 import Waveform from "./Waveform";
 
 interface AppProps {}
@@ -26,6 +27,7 @@ class App extends Component<AppProps, AppState> {
     render() {
         return <div>
             <AudioLoader handleFileLoad={this.handleFileLoad}/>
+            <AudioPlayer audioBuffer={this.state.audioBuffer}/>
             <Waveform audioBuffer={this.state.audioBuffer}/>
         </div>;
     }
