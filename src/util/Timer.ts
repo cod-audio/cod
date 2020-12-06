@@ -1,30 +1,23 @@
 class Timer {
-    private callback?: (time: number) => void;
     private elapsed: number = 0;
-    private interval: number;
-    private stepSize: number = 1;
-
-    constructor(updateCallback?: (time: number) => void) {
-        this.callback = updateCallback;
-    }
+    private startTime?: number;
 
     getElapsed(): number {
         return this.elapsed;
     }
 
     start() {
-        this.interval = window.setInterval(
-            this.step.bind(this), // Yes, the binding is required
-            this.stepSize
-        );
+        this.startTime = Date.now();
     }
 
     stop() {
-        window.clearInterval(this.interval);
+        this.elapsed = Date.now() - this.startTime;
+        this.startTime = null;
     }
 
     reset() {
         this.elapsed = 0;
+        this.startTime = null;
     }
 
     increment(timeInMs: number) {
@@ -36,11 +29,6 @@ class Timer {
         if (this.elapsed < 0) {
             this.elapsed = 0;
         }
-    }
-
-    private step() {
-        this.elapsed += this.stepSize;
-        this.callback?.(this.elapsed);
     }
 }
 
