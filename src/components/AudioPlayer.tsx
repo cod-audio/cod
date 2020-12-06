@@ -1,11 +1,13 @@
 import React, { Component } from "react";
 
+import Timer from "../util/Timer";
+
 interface AudioPlayerProps {
     audioBuffer?: AudioBuffer;
 }
 
 interface AudioPlayerState {
-    playbackTime: Number;
+    timer: Timer;
 }
 
 class AudioPlayer extends Component<AudioPlayerProps, AudioPlayerState>{
@@ -13,7 +15,9 @@ class AudioPlayer extends Component<AudioPlayerProps, AudioPlayerState>{
     context: AudioContext = new window.AudioContext();
     audioSource: AudioBufferSourceNode;
 
-    defaultState: AudioPlayerState = { playbackTime: 0.0 };
+    defaultState: AudioPlayerState = {
+        timer: new Timer(() => console.log("Tick, Tock"))
+    };
 
     constructor(props: AudioPlayerProps) {
         super(props);
@@ -32,12 +36,14 @@ class AudioPlayer extends Component<AudioPlayerProps, AudioPlayerState>{
     playAudio = () => {
         if (this.audioSource) {
             this.audioSource.start();
+            this.state.timer.start();
         }
     }
 
     stopAudio = () => {
         if (this.audioSource) {
             this.audioSource.stop();
+            this.state.timer.stop();
         }
     }
 
