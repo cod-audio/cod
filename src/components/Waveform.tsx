@@ -1,13 +1,13 @@
 import React, { Component } from "react";
-import "./TrackArea.css";
+import "./Waveform.css";
 
-import Waveform from "waveform-react";
+import WaveformReact from "waveform-react";
 
-interface TrackAreaProps {
+interface WaveformProps {
     audioBuffer?: AudioBuffer;
 }
 
-class TrackArea extends Component<TrackAreaProps, {}> {
+class Waveform extends Component<WaveformProps, {}> {
 
     render() {
         // Janky hack
@@ -15,7 +15,7 @@ class TrackArea extends Component<TrackAreaProps, {}> {
 
         return this.props.audioBuffer ?
             <div className="waveform-wrapper">
-                <Waveform
+                <WaveformReact
                     buffer={this.props.audioBuffer}
                     plot="line"
                     responsive={true}
@@ -31,4 +31,4 @@ class TrackArea extends Component<TrackAreaProps, {}> {
 
 }
 
-export default TrackArea;
+export default Waveform;
