@@ -5,7 +5,8 @@ class AudioPlayer {
     private audioBuffer?: AudioBuffer;
     private audioSource?: AudioBufferSourceNode;
     private context: AudioContext;
-    private loaded: boolean = false;
+    private isLoaded: boolean = false;
+    private isPlaying: boolean = false;
     private timer: Timer;
 
     constructor() {
@@ -15,7 +16,7 @@ class AudioPlayer {
 
     load(audioBuffer: AudioBuffer) {
         this.audioBuffer = audioBuffer;
-        this.loaded = true;
+        this.isLoaded = true;
     }
 
     play() {
@@ -23,6 +24,7 @@ class AudioPlayer {
             this.createAudioSource();
             this.timer.start();
             this.audioSource.start(0, this.timer.getElapsed() / 1000);
+            this.isPlaying = true;
         }
     }
 
@@ -32,15 +34,20 @@ class AudioPlayer {
             this.audioSource.stop();
             this.audioSource = null;
             console.log(this.timer.getElapsed());
+            this.isPlaying = false;
         }
     }
 
-    getElapsed() {
+    getElapsed(): number {
         return this.timer.getElapsed();
     }
 
-    getLoaded() {
-        return this.loaded;
+    getIsLoaded(): boolean {
+        return this.isLoaded;
+    }
+
+    getIsPlaying(): boolean {
+        return this.isPlaying;
     }
 
     private createAudioSource() {

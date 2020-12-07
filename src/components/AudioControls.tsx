@@ -5,6 +5,8 @@ import AudioPlayer from "../util/AudioPlayer";
 
 interface AudioControlsProps {
     audioPlayer?: AudioPlayer;
+    pauseCallback: () => void;
+    playCallback: () => void;
 }
 
 interface AudioControlsState {
@@ -23,15 +25,17 @@ class AudioControls extends Component<AudioControlsProps, AudioControlsState> {
     }
 
     playPressed = () => {
-        if (this.props.audioPlayer.getLoaded()) {
+        if (this.props.audioPlayer.getIsLoaded()) {
             this.setState({ paused: false });
             this.props.audioPlayer.play();
+            this.props.playCallback();
         }
     }
 
     pausePressed = () => {
         this.setState({ paused: true });
         this.props.audioPlayer.pause();
+        this.props.pauseCallback();
     }
     
     render() {

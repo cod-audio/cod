@@ -1,25 +1,22 @@
 import React, { Component } from "react";
 import "./App.css";
 
-import AudioControls from "./AudioControls";
 import AudioLoader from "./AudioLoader";
 import AudioPlayer from "../util/AudioPlayer";
-import Waveform from "./Waveform";
-
-interface AppProps {}
+import TrackArea from "./TrackArea";
 
 interface AppState {
     audioBuffer?: AudioBuffer;
     audioPlayer: AudioPlayer;
 }
 
-class App extends Component<AppProps, AppState> {
+class App extends Component<{}, AppState> {
 
     defaultState: AppState = {
         audioPlayer: new AudioPlayer()
     };
 
-    constructor(props: AppProps) {
+    constructor(props: {}) {
         super(props);
         this.state = this.defaultState;
     }
@@ -34,8 +31,9 @@ class App extends Component<AppProps, AppState> {
     render() {
         return <div className="App">
             <AudioLoader handleFileLoad={this.handleFileLoad}/>
-            <AudioControls audioPlayer={this.state.audioPlayer}/>
-            <Waveform audioBuffer={this.state.audioBuffer}/>
+            <TrackArea audioBuffer={this.state.audioBuffer}
+                       audioPlayer={this.state.audioPlayer}
+                       isAudioPlaying={this.state.audioPlayer.getIsPlaying()}/>
         </div>;
     }
 

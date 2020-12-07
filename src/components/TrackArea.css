@@ -1,0 +1,28 @@
+.track-area {
+    height: 500px;
+    width: 1000px;
+    border: 1px solid black;
+}
+
+.label-area {
+    height: 25px;
+    width: 100%;
+    border-bottom: 1px solid black;
+}
+
+.playhead-area {
+    height: 25px;
+    width: 100%;
+    border-bottom: 1px solid black;
+}
+
+.waveform-area {
+    height: 400px;
+    width: 100%;
+    border-bottom: 1px solid black;
+}
+
+.controls-area {
+    height: 50px;
+    width: 100%;
+}
