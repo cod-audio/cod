@@ -36,6 +36,10 @@ class AudioPlayer {
         }
     }
 
+    public reset() {
+        this.timer.reset();
+    }
+
     public getElapsed(): number {
         return this.timer.getElapsed();
     }

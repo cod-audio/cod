@@ -22,6 +22,7 @@ interface TrackAreaState {
 
 class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
+    playheadStepInterval?: number;
     playheadStepSize = 5;
 
     defaultState: TrackAreaState = {
@@ -34,10 +35,9 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         this.state = this.defaultState;
     }
 
-    updatePlayheadPosition = () => {
+    calculateInterval(): number {
         const buffer = this.props.audioBuffer;
-        const interval: number = (StyleConstants.TrackAreaWidth * buffer?.sampleRate * this.playheadStepSize) / (1000 * buffer?.length);
-        this.setState({ playheadPosition: this.state.playheadPosition + interval });
+        return (StyleConstants.TrackAreaWidth * buffer?.sampleRate * this.playheadStepSize) / (1000 * buffer?.length);
     }
 
     onLabelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -70,8 +70,16 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     onPlayPressed = () => {
         if (window && this.props.audioPlayer.getIsLoaded() && !this.props.audioPlayer.getIsPlaying()) {
+            this.playheadStepInterval = this.calculateInterval();
             this.props.audioPlayer.play();
-            const playheadIntervalId = window.setInterval(() => this.updatePlayheadPosition(), this.playheadStepSize);
+            const playheadIntervalId = window.setInterval(() => {
+                this.setState({ playheadPosition: this.state.playheadPosition + this.playheadStepInterval || 0 });
+                if (this.state.playheadPosition >= StyleConstants.TrackAreaWidth) {
+                    this.onPausePressed();
+                    this.props.audioPlayer.reset();
+                    // this.setState({ playheadPosition: 0 });
+                }
+            }, this.playheadStepSize);
             this.setState({ playheadIntervalId });
         }
     }
