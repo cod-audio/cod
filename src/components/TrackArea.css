@@ -5,6 +5,8 @@
 }
 
 .label-area {
+    display: flex;
+    align-items: center;
     height: 25px;
     width: 100%;
     border-bottom: 1px solid black;

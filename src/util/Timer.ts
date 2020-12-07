@@ -2,29 +2,29 @@ class Timer {
     private elapsed: number = 0;
     private startTime?: number;
 
-    getElapsed(): number {
+    public getElapsed(): number {
         return this.elapsed;
     }
 
-    start() {
+    public start() {
         this.startTime = Date.now();
     }
 
-    stop() {
+    public stop() {
         this.elapsed = Date.now() - this.startTime;
         this.startTime = null;
     }
 
-    reset() {
+    public reset() {
         this.elapsed = 0;
         this.startTime = null;
     }
 
-    increment(timeInMs: number) {
+    public increment(timeInMs: number) {
         this.elapsed += timeInMs;
     }
 
-    decrement(timeInMs: number) {
+    public decrement(timeInMs: number) {
         this.elapsed -= timeInMs;
         if (this.elapsed < 0) {
             this.elapsed = 0;

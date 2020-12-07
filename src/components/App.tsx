@@ -3,6 +3,7 @@ import "./App.css";
 
 import AudioLoader from "./AudioLoader";
 import AudioPlayer from "../util/AudioPlayer";
+import StyleConstants from "../util/StyleConstants";
 import TrackArea from "./TrackArea";
 
 interface AppState {
@@ -29,11 +30,11 @@ class App extends Component<{}, AppState> {
     }
 
     render() {
-        return <div className="App">
+        return <div className="App"
+                    style={{ margin: StyleConstants.AppMargin }}>
             <AudioLoader handleFileLoad={this.handleFileLoad}/>
             <TrackArea audioBuffer={this.state.audioBuffer}
-                       audioPlayer={this.state.audioPlayer}
-                       isAudioPlaying={this.state.audioPlayer.getIsPlaying()}/>
+                       audioPlayer={this.state.audioPlayer}/>
         </div>;
     }
 

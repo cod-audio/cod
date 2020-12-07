@@ -14,12 +14,12 @@ class AudioPlayer {
         this.timer = new Timer();
     }
 
-    load(audioBuffer: AudioBuffer) {
+    public load(audioBuffer: AudioBuffer) {
         this.audioBuffer = audioBuffer;
         this.isLoaded = true;
     }
 
-    play() {
+    public play() {
         if (this.audioBuffer) {
             this.createAudioSource();
             this.timer.start();
@@ -28,25 +28,24 @@ class AudioPlayer {
         }
     }
 
-    pause() {
+    public pause() {
         if (this.audioBuffer) {
             this.timer.stop();
             this.audioSource.stop();
             this.audioSource = null;
-            console.log(this.timer.getElapsed());
             this.isPlaying = false;
         }
     }
 
-    getElapsed(): number {
+    public getElapsed(): number {
         return this.timer.getElapsed();
     }
 
-    getIsLoaded(): boolean {
+    public getIsLoaded(): boolean {
         return this.isLoaded;
     }
 
-    getIsPlaying(): boolean {
+    public getIsPlaying(): boolean {
         return this.isPlaying;
     }
 
