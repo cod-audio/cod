@@ -40,6 +40,13 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         return (StyleConstants.TrackAreaWidth * buffer?.sampleRate * this.playheadStepSize) / (1000 * buffer?.length);
     }
 
+    matchAudioToPlayhead(playheadPosition: number) {
+        const buffer = this.props.audioBuffer;
+        const trackTimeSec = buffer.length / buffer.sampleRate;
+        const pixelsTravelledRatio = playheadPosition / StyleConstants.TrackAreaWidth;
+        this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
+    }
+
     onLabelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
 
@@ -48,16 +55,27 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         this.setState({ playheadPosition });
 
         this.onPausePressed();
-
-        const buffer = this.props.audioBuffer;
-        const trackTimeSec = buffer.length / buffer.sampleRate;
-        const pixelsTravelledRatio = playheadPosition / StyleConstants.TrackAreaWidth;
-        this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
+        this.matchAudioToPlayhead(playheadPosition);
     }
 
     onLabelAreaClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         const x = e.pageX - e.currentTarget.offsetLeft;
         this.setState({ labels: [...this.state.labels, new LabelInfo(x)] });
+    }
+
+    onPlayheadAreaClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+        const x = e.pageX - e.currentTarget.offsetLeft;
+        const playheadPosition = Math.max(x - StyleConstants.AppMargin + (StyleConstants.PlayheadWidth / 2) + 1, 0);
+        this.setState({ playheadPosition });
+
+        this.onPausePressed();
+        this.matchAudioToPlayhead(playheadPosition);
+    }
+
+    resetTrack = () => {
+        this.onPausePressed();
+        this.props.audioPlayer.reset();
+        // this.setState({ playheadPosition: 0 });
     }
 
     onPausePressed = () => {
@@ -70,14 +88,17 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     onPlayPressed = () => {
         if (window && this.props.audioPlayer.getIsLoaded() && !this.props.audioPlayer.getIsPlaying()) {
+            if (this.state.playheadPosition >= StyleConstants.TrackAreaWidth) {
+                this.resetTrack();
+                // Remove this line if we decide to add it to resetTrack()
+                this.setState({ playheadPosition: 0 });
+            }
             this.playheadStepInterval = this.calculateInterval();
             this.props.audioPlayer.play();
             const playheadIntervalId = window.setInterval(() => {
                 this.setState({ playheadPosition: this.state.playheadPosition + this.playheadStepInterval || 0 });
                 if (this.state.playheadPosition >= StyleConstants.TrackAreaWidth) {
-                    this.onPausePressed();
-                    this.props.audioPlayer.reset();
-                    // this.setState({ playheadPosition: 0 });
+                    this.resetTrack();
                 }
             }, this.playheadStepSize);
             this.setState({ playheadIntervalId });
@@ -95,7 +116,8 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
                            onClickHandler={this.onLabelClick.bind(this)}/>
                 )}
             </div>
-            <div className="playhead-area">
+            <div className="playhead-area"
+                 onClick={this.onPlayheadAreaClick.bind(this)}>
                 <Playhead x={this.state.playheadPosition}/>
             </div>
             <div className="waveform-area">
