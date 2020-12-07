@@ -2,22 +2,28 @@ class Timer {
     private elapsed: number = 0;
     private startTime?: number;
 
+    public start() {
+        if (!this.elapsed) {
+            this.startTime = Date.now();
+        }
+    }
+
+    public pause() {
+        this.elapsed += Date.now() - this.startTime;
+    }
+    
+    public reset() {
+        this.elapsed = 0;
+        this.startTime = null;
+    }
+
     public getElapsed(): number {
         return this.elapsed;
     }
 
-    public start() {
-        this.startTime = Date.now();
-    }
-
-    public stop() {
-        this.elapsed = Date.now() - this.startTime;
-        this.startTime = null;
-    }
-
-    public reset() {
-        this.elapsed = 0;
-        this.startTime = null;
+    // Used for manual scrubbing
+    public setElapsed(elapsed: number) {
+        this.elapsed = Math.round(elapsed);
     }
 
     public increment(timeInMs: number) {

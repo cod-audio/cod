@@ -22,6 +22,8 @@ interface TrackAreaState {
 
 class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
+    playheadStepSize = 5;
+
     defaultState: TrackAreaState = {
         labels: [],
         playheadPosition: 0
@@ -32,18 +34,25 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         this.state = this.defaultState;
     }
 
-    // TODO: Calculate this correctly
     updatePlayheadPosition = () => {
-        this.setState({ playheadPosition: this.state.playheadPosition + 1 });
+        const buffer = this.props.audioBuffer;
+        const interval: number = (StyleConstants.TrackAreaWidth * buffer?.sampleRate * this.playheadStepSize) / (1000 * buffer?.length);
+        this.setState({ playheadPosition: this.state.playheadPosition + interval });
     }
 
     onLabelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
         e.stopPropagation();
 
         const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
-        this.setState({ playheadPosition: labelRect.left - StyleConstants.AppMargin });
+        const playheadPosition = labelRect.left - StyleConstants.AppMargin;
+        this.setState({ playheadPosition });
 
         this.onPausePressed();
+
+        const buffer = this.props.audioBuffer;
+        const trackTimeSec = buffer.length / buffer.sampleRate;
+        const pixelsTravelledRatio = playheadPosition / StyleConstants.TrackAreaWidth;
+        this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
     }
 
     onLabelAreaClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -62,13 +71,14 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
     onPlayPressed = () => {
         if (window && this.props.audioPlayer.getIsLoaded() && !this.props.audioPlayer.getIsPlaying()) {
             this.props.audioPlayer.play();
-            const playheadIntervalId = window.setInterval(() => this.updatePlayheadPosition(), 1);
+            const playheadIntervalId = window.setInterval(() => this.updatePlayheadPosition(), this.playheadStepSize);
             this.setState({ playheadIntervalId });
         }
     }
 
     render() {
-        return <div className="track-area">
+        return <div className="track-area"
+                    style={{ width: StyleConstants.TrackAreaWidth }}>
             <div className="label-area"
                  onClick={this.onLabelAreaClick.bind(this)}>
                 {this.state.labels.map((label: LabelInfo) => 

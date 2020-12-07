@@ -30,15 +30,18 @@ class AudioPlayer {
 
     public pause() {
         if (this.audioBuffer) {
-            this.timer.stop();
+            this.timer.pause();
             this.audioSource.stop();
-            this.audioSource = null;
             this.isPlaying = false;
         }
     }
 
     public getElapsed(): number {
         return this.timer.getElapsed();
+    }
+
+    public setElapsed(elapsed: number) {
+        this.timer.setElapsed(elapsed);
     }
 
     public getIsLoaded(): boolean {
