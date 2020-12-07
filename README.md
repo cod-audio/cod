@@ -1,5 +1,7 @@
 # Cod
 
+_Cod is currently in open Alpha, and as such is not a finished project yet. Keep checking back for updates!_
+
 Cod is an online audio labeller and playback device. Upload audio, listen to it, manually add or auto-generate labels, and export them for use in your favorite DAW.
 
 ### Building
