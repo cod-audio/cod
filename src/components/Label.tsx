@@ -1,11 +1,11 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import "./Label.css";
 
 import LabelInfo from "../util/LabelInfo";
 
 interface LabelProps {
     info: LabelInfo;
-    onClickHandler: () => void;
+    onClickHandler: (e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
 interface LabelState {
@@ -21,20 +21,18 @@ class Label extends Component<LabelProps, LabelState> {
         };
     }
 
-    onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        e.stopPropagation();
-        this.setState({ text: e.currentTarget.value });
+    runOnClickHandlerOnEnter = (e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (e.key === "Enter") {
+            this.props.onClickHandler(e);
+        }
     }
-
 
     render() {
         return <div className="label"
                     onClick={this.props.onClickHandler}
+                    onKeyDown={this.runOnClickHandlerOnEnter}
                     style={{ left: this.props.info.x }}>
                     Label
-                    {/*<input onInput={this.onChange}
-                           type="text"
-                           value={this.state.text}/>*/}
                </div>;
     }
 

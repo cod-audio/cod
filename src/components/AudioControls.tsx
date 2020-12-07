@@ -14,11 +14,25 @@ interface AudioControlsState {}
 
 class AudioControls extends Component<AudioControlsProps, AudioControlsState> {
     
+    runPauseHandlerOnEnter = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+        if (e.key === "Enter") {
+            this.props.onPauseCallback();
+        }
+    }
+
+    runPlayHandlerOnEnter = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+        if (e.key === "Enter") {
+            this.props.onPlayCallback();
+        }
+    }
+
     render() {
         return <div className="audio-controls">
             {this.props.isPlaying ?
-                <button onClick={this.props.onPauseCallback}>Pause</button> :
-                <button onClick={this.props.onPlayCallback}>Play</button>}
+                <button onClick={this.props.onPauseCallback}
+                        onKeyDown={this.runPauseHandlerOnEnter}>Pause</button> :
+                <button onClick={this.props.onPlayCallback}
+                        onKeyDown={this.runPlayHandlerOnEnter}>Play</button>}
         </div>;
     }
 

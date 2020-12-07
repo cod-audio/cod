@@ -20,6 +20,9 @@ interface TrackAreaState {
     playheadPosition: number;
 }
 
+type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
+type KeyboardEvent = React.KeyboardEvent<HTMLDivElement>;
+
 class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     playheadStepInterval?: number;
@@ -47,7 +50,7 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
     }
 
-    onLabelClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    onLabelClick = (e: MouseEvent | KeyboardEvent) => {
         e.stopPropagation();
 
         const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
@@ -58,12 +61,12 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         this.matchAudioToPlayhead(playheadPosition);
     }
 
-    onLabelAreaClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    onLabelAreaClick = (e: MouseEvent) => {
         const x = e.pageX - e.currentTarget.offsetLeft;
         this.setState({ labels: [...this.state.labels, new LabelInfo(x)] });
     }
 
-    onPlayheadAreaClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    onPlayheadAreaClick = (e: MouseEvent) => {
         const x = e.pageX - e.currentTarget.offsetLeft;
         const playheadPosition = Math.max(x - StyleConstants.AppMargin + (StyleConstants.PlayheadWidth / 2) + 1, 0);
         this.setState({ playheadPosition });

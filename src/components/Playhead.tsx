@@ -15,6 +15,7 @@ class Playhead extends Component<PlayheadProps, PlayheadState> {
 
     render() {
         return <div className="playhead"
+                    tabIndex={-1}
                     style={{
                         left: this.props.x - (StyleConstants.PlayheadWidth / 2),
                         width: StyleConstants.PlayheadWidth
