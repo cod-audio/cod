@@ -31,7 +31,9 @@ class Label extends Component<LabelProps, LabelState> {
         return <div className="label"
                     onClick={this.props.onClickHandler}
                     onKeyDown={this.runOnClickHandlerOnEnter}
-                    style={{ left: this.props.info.x }}>
+                    ref={this.props.info.ref}
+                    style={{ left: this.props.info.x }}
+                    tabIndex={0}>
                     Label
                </div>;
     }

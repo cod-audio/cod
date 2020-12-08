@@ -9,3 +9,7 @@
     background-color: white;
     cursor: pointer;
 }
+
+.label :focus {
+    outline: 2px solid orange;
+}
