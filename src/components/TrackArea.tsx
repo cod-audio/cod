@@ -226,8 +226,7 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         return <div className="track-area"
                     style={{ width: Style.TrackAreaWidth }}>
             <div className="label-area"
-                 onClick={this.onLabelAreaClick.bind(this)}
-                 tabIndex={0}>
+                 onClick={this.onLabelAreaClick.bind(this)}>
                 {this.state.labels.map((label: LabelInfo) => <Label key={label._id}
                                    info={label}
                                    onSelectHandler={this.onLabelSelect.bind(this)}/>)}
