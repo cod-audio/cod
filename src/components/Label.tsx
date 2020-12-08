@@ -5,7 +5,7 @@ import LabelInfo from "../util/LabelInfo";
 
 interface LabelProps {
     info: LabelInfo;
-    onClickHandler: (e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent<HTMLDivElement>) => void;
+    onSelectHandler: (e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent<HTMLDivElement>) => void;
 }
 
 interface LabelState {
@@ -21,16 +21,16 @@ class Label extends Component<LabelProps, LabelState> {
         };
     }
 
-    runOnClickHandlerOnEnter = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    runOnSelectHandlerOnEnter = (e: React.KeyboardEvent<HTMLDivElement>) => {
         if (e.key === "Enter") {
-            this.props.onClickHandler(e);
+            this.props.onSelectHandler(e);
         }
     }
 
     render() {
         return <div className="label"
-                    onClick={this.props.onClickHandler}
-                    onKeyDown={this.runOnClickHandlerOnEnter}
+                    onClick={this.props.onSelectHandler}
+                    onKeyDown={this.runOnSelectHandlerOnEnter}
                     ref={this.props.info.ref}
                     style={{ left: this.props.info.x }}
                     tabIndex={0}>

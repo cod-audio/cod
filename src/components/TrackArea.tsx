@@ -52,7 +52,8 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     createLabel = (x: number) => {
         const ref = React.createRef<HTMLDivElement>();
-        this.setState({ labels: [...this.state.labels, new LabelInfo(x, ref)] });
+        const labels = [...this.state.labels, new LabelInfo(x, ref)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
+        this.setState({ labels });
     }
 
     focusNextOrPrevMatchingLabel = (direction: ArrowKey.Left | ArrowKey.Right) => {
@@ -111,34 +112,43 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         }
     }
 
-    onLabelClick = (e: MouseEvent | KeyboardEvent) => {
+    onLabelSelect = (e: MouseEvent | KeyboardEvent) => {
         e.stopPropagation();
 
-        const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
-        const playheadPosition = labelRect.left - StyleConstants.AppMargin;
-        this.setState({ playheadPosition });
+        // Undefined behavior if labels are somehow selected without audio being loaded
+        if (this.props.audioBuffer) {
+            const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
+            const playheadPosition = labelRect.left - StyleConstants.AppMargin;
+            this.setState({ playheadPosition });
 
-        this.onPausePressed();
-        this.matchAudioToPlayhead(playheadPosition);
+            this.onPausePressed();
+            this.matchAudioToPlayhead(playheadPosition);
+        }
     }
 
     onLabelAreaClick = (e: MouseEvent) => {
-        this.createLabel(e.pageX - e.currentTarget.offsetLeft);
+        // Labels shouldn't be created without audio loaded
+        if (this.props.audioBuffer) {
+            this.createLabel(e.pageX - e.currentTarget.offsetLeft);
+        }
     }
 
     onPlayheadAreaClick = (e: MouseEvent) => {
-        const x = e.pageX - e.currentTarget.offsetLeft;
-        const playheadPosition = Math.max(x - StyleConstants.AppMargin + (StyleConstants.PlayheadWidth / 2) + 1, 0);
-        this.setState({ playheadPosition });
+        // Disable playhead movement if audio is not loaded
+        if (this.props.audioBuffer) {
+            const x = e.pageX - e.currentTarget.offsetLeft;
+            const playheadPosition = Math.max(x - StyleConstants.AppMargin + (StyleConstants.PlayheadWidth / 2) + 1, 0);
+            this.setState({ playheadPosition });
 
-        this.onPausePressed();
-        this.matchAudioToPlayhead(playheadPosition);
+            this.onPausePressed();
+            this.matchAudioToPlayhead(playheadPosition);
+        }
     }
 
     resetTrack = () => {
         this.onPausePressed();
         this.props.audioPlayer.reset();
-        // this.setState({ playheadPosition: 0 });
+        this.setState({ playheadPosition: 0 });
     }
 
     onPausePressed = () => {
@@ -153,15 +163,13 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         if (window && this.props.audioPlayer.getIsLoaded() && !this.props.audioPlayer.getIsPlaying()) {
             if (this.state.playheadPosition >= StyleConstants.TrackAreaWidth) {
                 this.resetTrack();
-                // Remove this line if we decide to add it to resetTrack()
-                this.setState({ playheadPosition: 0 });
             }
             this.playheadStepInterval = this.calculateInterval();
             this.props.audioPlayer.play();
             const playheadIntervalId = window.setInterval(() => {
                 this.setState({ playheadPosition: this.state.playheadPosition + this.playheadStepInterval || 0 });
                 if (this.state.playheadPosition >= StyleConstants.TrackAreaWidth) {
-                    this.resetTrack();
+                    this.onPausePressed();
                 }
             }, this.playheadStepSize);
             this.setState({ playheadIntervalId });
@@ -172,14 +180,16 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         return <div className="track-area"
                     style={{ width: StyleConstants.TrackAreaWidth }}>
             <div className="label-area"
-                 onClick={this.onLabelAreaClick.bind(this)}>
+                 onClick={this.onLabelAreaClick.bind(this)}
+                 tabIndex={0}>
                 {this.state.labels.map((label: LabelInfo) => <Label key={label._id}
                                    info={label}
-                                   onClickHandler={this.onLabelClick.bind(this)}/>)}
+                                   onSelectHandler={this.onLabelSelect.bind(this)}/>)}
             </div>
             <div className="playhead-area"
-                 onClick={this.onPlayheadAreaClick.bind(this)}>
-                <Playhead x={this.state.playheadPosition}/>
+                 onClick={this.onPlayheadAreaClick.bind(this)}
+                 tabIndex={0}>
+                {this.props.audioBuffer ? <Playhead x={this.state.playheadPosition}/> : null}
             </div>
             <div className="waveform-area">
                 <Waveform audioBuffer={this.props.audioBuffer}/>
