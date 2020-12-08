@@ -36,6 +36,8 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
     constructor(props: TrackAreaProps) {
         super(props);
         this.state = this.defaultState;
+
+        window.document.onkeydown = this.onKeyDown.bind(this);
     }
 
     calculateInterval(): number {
@@ -45,9 +47,11 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     matchAudioToPlayhead(playheadPosition: number) {
         const buffer = this.props.audioBuffer;
-        const trackTimeSec = buffer.length / buffer.sampleRate;
-        const pixelsTravelledRatio = playheadPosition / StyleConstants.TrackAreaWidth;
-        this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
+        if (buffer) {
+            const trackTimeSec = buffer.length / buffer.sampleRate;
+            const pixelsTravelledRatio = playheadPosition / StyleConstants.TrackAreaWidth;
+            this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
+        }
     }
 
     onLabelClick = (e: MouseEvent | KeyboardEvent) => {
@@ -108,8 +112,15 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         }
     }
 
+    onKeyDown = (e: KeyboardEvent) => {
+        if (e.key.toLowerCase() === "l") {
+            this.setState({ labels: [...this.state.labels, new LabelInfo(this.state.playheadPosition)] });
+        }
+    }
+
     render() {
         return <div className="track-area"
+                    onKeyDown={this.onKeyDown.bind(this)}
                     style={{ width: StyleConstants.TrackAreaWidth }}>
             <div className="label-area"
                  onClick={this.onLabelAreaClick.bind(this)}>
