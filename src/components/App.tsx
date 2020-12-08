@@ -3,6 +3,7 @@ import "./App.css";
 
 import AudioLoader from "./AudioLoader";
 import AudioPlayer from "../util/AudioPlayer";
+import PageDescription from "./PageDescription";
 import StyleConstants from "../util/StyleConstants";
 import TrackArea from "./TrackArea";
 
@@ -30,12 +31,13 @@ class App extends Component<{}, AppState> {
     }
 
     render() {
-        return <div className="App"
+        return <main className="App"
                     style={{ margin: StyleConstants.AppMargin }}>
+            <PageDescription/>
             <AudioLoader handleFileLoad={this.handleFileLoad}/>
             <TrackArea audioBuffer={this.state.audioBuffer}
                        audioPlayer={this.state.audioPlayer}/>
-        </div>;
+        </main>;
     }
 
 }
