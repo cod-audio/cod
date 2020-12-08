@@ -24,6 +24,7 @@ class PageDescription extends Component<{}, {}> {
                     Press shift plus the left and right arrow keys while the playhead 
                     is focused to move the playhead.
                 </li>
+                <li>Press L to create a new label at the playhead location.</li>
                 <li>
                     Press shift plus the left and right arrow keys while a label is 
                     selected to focus the next or previous label with the same name.
