@@ -16,13 +16,14 @@ class AudioControls extends Component<AudioControlsProps, AudioControlsState> {
     
     runPauseHandlerOnEnter = (e: React.KeyboardEvent<HTMLButtonElement>) => {
         if (e.key === "Enter") {
-            this.props.onPauseCallback();
+            // Set timeout to prevent duplicate play and pause events from firing
+            setTimeout(this.props.onPauseCallback, 10);
         }
     }
 
     runPlayHandlerOnEnter = (e: React.KeyboardEvent<HTMLButtonElement>) => {
         if (e.key === "Enter") {
-            this.props.onPlayCallback();
+            setTimeout(this.props.onPlayCallback, 10);
         }
     }
 
