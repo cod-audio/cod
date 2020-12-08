@@ -7,11 +7,7 @@ interface PlayheadProps {
     x: number;
 }
 
-interface PlayheadState {
-    
-}
-
-class Playhead extends Component<PlayheadProps, PlayheadState> {
+class Playhead extends Component<PlayheadProps, {}> {
 
     render() {
         return <div className="playhead"

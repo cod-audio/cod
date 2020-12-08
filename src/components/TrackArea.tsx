@@ -7,7 +7,7 @@ import AudioPlayer from "../util/AudioPlayer";
 import Label from "./Label";
 import LabelInfo from "../util/LabelInfo";
 import Playhead from "./Playhead";
-import StyleConstants from "../util/StyleConstants";
+import Style from "../util/StyleConstants";
 import Waveform from "./Waveform";
 
 interface TrackAreaProps {
@@ -21,8 +21,9 @@ interface TrackAreaState {
     playheadPosition: number;
 }
 
-type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
 type KeyboardEvent = React.KeyboardEvent<HTMLDivElement>;
+type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
+type Ref = React.RefObject<HTMLDivElement>;
 
 enum ArrowKey {
     Up = "arrowup",
@@ -33,8 +34,10 @@ enum ArrowKey {
 
 class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
+    playheadAreaRef: Ref;
+    playheadArrowKeyMovePixels: number = 5;
     playheadStepInterval?: number;
-    playheadStepSize = 5;
+    playheadStepSizeMs = 5;
 
     defaultState: TrackAreaState = {
         labels: [],
@@ -44,31 +47,41 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
     constructor(props: TrackAreaProps) {
         super(props);
         this.state = this.defaultState;
+
+        this.playheadAreaRef = React.createRef();
     }
 
     componentDidMount() {
         window.addEventListener("keydown", this.onKeyDown.bind(this));
     }
 
-    createLabel = (x: number) => {
-        const ref = React.createRef<HTMLDivElement>();
-        const labels = [...this.state.labels, new LabelInfo(x, ref)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
-        this.setState({ labels });
+    // MARK: Custom accessibility navigation
+
+    isFocused = (ref: Ref) => {
+        return window && window.document.activeElement === ReactDOM.findDOMNode(ref.current);
     }
 
-    focusNextOrPrevMatchingLabel = (direction: ArrowKey.Left | ArrowKey.Right) => {
-        // I love how well-documented and intuitive setting up custom focus in React is :)
+    // Returns the index of the focused label, if any. Otherwise -1.
+    focusedLabelIndex = (): number => {
+        // Check if a label is currently focused
         const labels = this.state.labels;
         let i = 0;
         for (const info of labels) {
             // Find if the label has focus
-            if (window.document.activeElement === ReactDOM.findDOMNode(info.ref.current)) {
+            if (this.isFocused(info.ref)) {
                 break;
             }
             i++;
         }
+        if (i < labels.length) {
+            return i;
+        }
+        return -1;
+    }
 
-        // Label i has focus
+    // Navigate to the next or previous matching label (if one is currently focused)
+    focusNextOrPrevMatchingLabel = (i: number, direction: ArrowKey.Left | ArrowKey.Right) => {
+        const labels = this.state.labels;
         if (i < labels.length) {
             const increment = direction === ArrowKey.Left ? -1 : 1;
             const boundCondition = direction === ArrowKey.Left ?
@@ -91,25 +104,68 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         if (key === "l") {
             this.createLabel(this.state.playheadPosition);
         } else if (e.shiftKey) {
-            // Navigate to the next matching label (if one is currently focused)
             if (key === ArrowKey.Right || key === ArrowKey.Left) {
-                this.focusNextOrPrevMatchingLabel(key);
+                // Check if a label is focused
+                let i;
+                if ((i = this.focusedLabelIndex()) !== -1) {
+                    // Label i has focus
+                    this.focusNextOrPrevMatchingLabel(i, key);
+                }
+
+                // Check if the playhead area is focused
+                if (this.isFocused(this.playheadAreaRef)) {
+                    switch(key) {
+                        case ArrowKey.Right:
+                            this.setPlayheadPosition(this.state.playheadPosition + this.playheadArrowKeyMovePixels);
+                            break;
+                        case ArrowKey.Left:
+                            this.setPlayheadPosition(this.state.playheadPosition - this.playheadArrowKeyMovePixels);
+                            break;
+                        default:
+                    }
+                }
             }
         }
     }
+    
+    // MARK: Playhead movement and related methods
 
     calculateInterval(): number {
         const buffer = this.props.audioBuffer;
-        return (StyleConstants.TrackAreaWidth * buffer?.sampleRate * this.playheadStepSize) / (1000 * buffer?.length);
+        return (Style.TrackAreaWidth * buffer?.sampleRate * this.playheadStepSizeMs) / (1000 * buffer?.length);
+    }
+
+    setPlayheadPosition = (x: number) => {
+        // Disable playhead movement if audio is not loaded
+        if (this.props.audioBuffer) {
+            // const playheadPosition = Math.min(Math.max(x - Style.AppMargin + (Style.PlayheadWidth / 2) + 1, 0), Style.AppMargin + Style.TrackAreaWidth);
+            const playheadPosition = Math.max(x - Style.AppMargin + (Style.PlayheadWidth / 2) + 1, 0);
+            this.setState({ playheadPosition });
+
+            this.onPausePressed();
+            this.matchAudioToPlayhead(playheadPosition);
+        }
     }
 
     matchAudioToPlayhead(playheadPosition: number) {
         const buffer = this.props.audioBuffer;
         if (buffer) {
             const trackTimeSec = buffer.length / buffer.sampleRate;
-            const pixelsTravelledRatio = playheadPosition / StyleConstants.TrackAreaWidth;
+            const pixelsTravelledRatio = playheadPosition / Style.TrackAreaWidth;
             this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
         }
+    }
+
+    onPlayheadAreaClick = (e: MouseEvent) => {
+        this.setPlayheadPosition(e.pageX - e.currentTarget.offsetLeft);
+    }
+
+    // MARK: Label creation and related methods
+
+    createLabel = (x: number) => {
+        const ref = React.createRef<HTMLDivElement>();
+        const labels = [...this.state.labels, new LabelInfo(x, ref)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
+        this.setState({ labels });
     }
 
     onLabelSelect = (e: MouseEvent | KeyboardEvent) => {
@@ -118,7 +174,7 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         // Undefined behavior if labels are somehow selected without audio being loaded
         if (this.props.audioBuffer) {
             const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
-            const playheadPosition = labelRect.left - StyleConstants.AppMargin;
+            const playheadPosition = labelRect.left - Style.AppMargin;
             this.setState({ playheadPosition });
 
             this.onPausePressed();
@@ -133,17 +189,7 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         }
     }
 
-    onPlayheadAreaClick = (e: MouseEvent) => {
-        // Disable playhead movement if audio is not loaded
-        if (this.props.audioBuffer) {
-            const x = e.pageX - e.currentTarget.offsetLeft;
-            const playheadPosition = Math.max(x - StyleConstants.AppMargin + (StyleConstants.PlayheadWidth / 2) + 1, 0);
-            this.setState({ playheadPosition });
-
-            this.onPausePressed();
-            this.matchAudioToPlayhead(playheadPosition);
-        }
-    }
+    // MARK: Audio playing
 
     resetTrack = () => {
         this.onPausePressed();
@@ -161,24 +207,24 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     onPlayPressed = () => {
         if (window && this.props.audioPlayer.getIsLoaded() && !this.props.audioPlayer.getIsPlaying()) {
-            if (this.state.playheadPosition >= StyleConstants.TrackAreaWidth) {
+            if (this.state.playheadPosition >= Style.TrackAreaWidth) {
                 this.resetTrack();
             }
             this.playheadStepInterval = this.calculateInterval();
             this.props.audioPlayer.play();
             const playheadIntervalId = window.setInterval(() => {
                 this.setState({ playheadPosition: this.state.playheadPosition + this.playheadStepInterval || 0 });
-                if (this.state.playheadPosition >= StyleConstants.TrackAreaWidth) {
+                if (this.state.playheadPosition >= Style.TrackAreaWidth) {
                     this.onPausePressed();
                 }
-            }, this.playheadStepSize);
+            }, this.playheadStepSizeMs);
             this.setState({ playheadIntervalId });
         }
     }
 
     render() {
         return <div className="track-area"
-                    style={{ width: StyleConstants.TrackAreaWidth }}>
+                    style={{ width: Style.TrackAreaWidth }}>
             <div className="label-area"
                  onClick={this.onLabelAreaClick.bind(this)}
                  tabIndex={0}>
@@ -188,6 +234,7 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
             </div>
             <div className="playhead-area"
                  onClick={this.onPlayheadAreaClick.bind(this)}
+                 ref={this.playheadAreaRef}
                  tabIndex={0}>
                 {this.props.audioBuffer ? <Playhead x={this.state.playheadPosition}/> : null}
             </div>
