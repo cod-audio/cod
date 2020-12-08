@@ -101,19 +101,23 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     onKeyDown = (e: KeyboardEvent) => {
         const key = e.key.toLowerCase();
-        if (key === "l") {
-            this.createLabel(this.state.playheadPosition);
-        } else if (e.shiftKey) {
-            if (key === ArrowKey.Right || key === ArrowKey.Left) {
+        if (e.altKey) {
+            if (key === "l") {
+                // We only override screen reader default behavior if one of our keybinds is detected
+                e.preventDefault();
+                this.createLabel(this.state.playheadPosition);
+            } else if (key === ArrowKey.Right || key === ArrowKey.Left) {
                 // Check if a label is focused
                 let i;
                 if ((i = this.focusedLabelIndex()) !== -1) {
+                    e.preventDefault();
                     // Label i has focus
                     this.focusNextOrPrevMatchingLabel(i, key);
                 }
 
                 // Check if the playhead area is focused
                 if (this.isFocused(this.playheadAreaRef)) {
+                    e.preventDefault();
                     switch(key) {
                         case ArrowKey.Right:
                             this.setPlayheadPosition(this.state.playheadPosition + this.playheadArrowKeyMovePixels);
@@ -157,7 +161,10 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
     }
 
     onPlayheadAreaClick = (e: MouseEvent) => {
-        this.setPlayheadPosition(e.pageX - e.currentTarget.offsetLeft);
+        // Condition prevents playhead from jumping to 0 when enter is pressed
+        if (e.pageX) {
+            this.setPlayheadPosition(e.pageX - e.currentTarget.offsetLeft);
+        }
     }
 
     // MARK: Label creation and related methods

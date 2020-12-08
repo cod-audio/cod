@@ -7,8 +7,7 @@ class PageDescription extends Component<{}, {}> {
 
     render() {
         return <section className="page-description"
-                        style={{ width: Style.TrackAreaWidth }}
-                        tabIndex={0}>
+                        style={{ width: Style.TrackAreaWidth }}>
             <h1>Welcome to Cod!</h1>
             <p>
                 Cod is an online tool for audio playback and labeling. Simply 
@@ -21,12 +20,13 @@ class PageDescription extends Component<{}, {}> {
             <ol>
                 <li>Press enter on the play button to play or pause the audio.</li>
                 <li>
-                    Press shift plus the left and right arrow keys while the playhead 
+                    Press alt + the left and right arrow keys while the playhead 
                     is focused to move the playhead.
                 </li>
-                <li>Press L to create a new label at the playhead location.</li>
+                <li>Press alt + L to create a new label at the playhead location.</li>
+                <li>Press enter on a label to move the playhead to that location.</li>
                 <li>
-                    Press shift plus the left and right arrow keys while a label is 
+                    Press alt + the left and right arrow keys while a label is 
                     selected to focus the next or previous label with the same name.
                 </li>
             </ol>

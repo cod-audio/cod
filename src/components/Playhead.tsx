@@ -11,11 +11,11 @@ class Playhead extends Component<PlayheadProps, {}> {
 
     render() {
         return <div className="playhead"
-                    tabIndex={-1}
                     style={{
                         left: this.props.x + StyleConstants.PlayheadOffset,
                         width: StyleConstants.PlayheadWidth
-                    }}>
+                    }}
+                    tabIndex={-1}>
             &#x25BC;
         </div>;
     }
