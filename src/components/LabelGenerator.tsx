@@ -25,7 +25,8 @@ class LabelGenerator extends Component<LabelGeneratorProps, LabelGeneratorState>
     getLabels = () => {
         this.setState({ disabled: true });
         axios.post(api.url, {
-            buffer: this.props.audioBuffer.getChannelData(0)
+            buffer: this.props.audioBuffer.getChannelData(0),
+            sampleRate: this.props.audioBuffer.sampleRate
         }).then((res: AxiosResponse) => {
             this.setState({ disabled: false });
             this.props.handleApiResponse(res);
