@@ -1,17 +1,15 @@
 import React from "react";
 
-type Ref = React.RefObject<HTMLDivElement>;
-
 class LabelInfo {
 
     readonly _id: number;
-    public ref: Ref;
+    public ref: React.RefObject<HTMLDivElement>;
     public text: string;
     public x: number;
 
-    constructor(x: number, ref: Ref, text: string = "Label") {
+    constructor(x: number, text: string = "Label") {
         this._id = Date.now();
-        this.ref = ref;
+        this.ref = React.createRef();
         this.text = text;
         this.x = x;
     }

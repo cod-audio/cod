@@ -3,7 +3,10 @@ import "./AudioLoader.css";
 
 import LabelInfo from "../util/LabelInfo";
 
-interface LabelLoaderProps {}
+interface LabelLoaderProps {
+    audioBuffer?: AudioBuffer;
+    onFileRead: (labels: Array<LabelInfo>) => void;
+}
 
 interface LabelLoaderState {}
 
@@ -20,7 +23,8 @@ class LabelLoader extends Component<LabelLoaderProps, LabelLoaderState> {
         this.fileReader = new FileReader();
 
         this.fileReader.onloadend = (_: ProgressEvent<FileReader>) => {
-            this.processLabelFile(this.fileReader.result as string);
+            const labels = this.processLabelFile(this.fileReader.result as string);
+            this.props.onFileRead(labels.filter((label: LabelInfo | null) => label !== null));
         }
     }
 
@@ -31,15 +35,17 @@ class LabelLoader extends Component<LabelLoaderProps, LabelLoaderState> {
             if (Number.isNaN(startTime)) {
                 return null;
             }
-            return new LabelInfo(startTime, React.createRef());
+            return new LabelInfo(startTime);
         });
     }
 
     render() {
-        return <input accept=".txt"
-                      name="file"
-                      onChange={e => this.fileReader.readAsText(e.target.files?.[0])}
-                      type="file"/>;
+        return this.props.audioBuffer ?
+                <input accept=".txt"
+                       name="file"
+                       onChange={e => this.fileReader.readAsText(e.target.files?.[0])}
+                       type="file"/>
+               : null;
     }
 
 }
