@@ -2,7 +2,7 @@ import React from "react";
 
 class LabelInfo {
 
-    readonly _id: number;
+    public _id: number;
     public ref: React.RefObject<HTMLDivElement>;
     public text: string;
     public x: number;
