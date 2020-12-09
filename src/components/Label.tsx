@@ -28,13 +28,15 @@ class Label extends Component<LabelProps, LabelState> {
     }
 
     render() {
-        return <div className="label"
+        return <div aria-label={`Label ${this.state.text}`}
+                    className="label"
                     onClick={this.props.onSelectHandler}
                     onKeyDown={this.runOnSelectHandlerOnEnter}
                     ref={this.props.info.ref}
+                    role="button"
                     style={{ left: this.props.info.x }}
                     tabIndex={0}>
-                    Label
+                    {this.state.text}
                </div>;
     }
 

@@ -9,7 +9,7 @@ class LabelInfo {
     public text: string;
     public x: number;
 
-    constructor(x: number, ref: Ref, text: string = "") {
+    constructor(x: number, ref: Ref, text: string = "Label") {
         this._id = Date.now();
         this.ref = ref;
         this.text = text;

@@ -250,7 +250,9 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
     render() {
         return <div className="track-area"
                     style={{ width: Style.TrackAreaWidth }}>
-            <div className="label-area"
+            <div aria-live="polite"
+                 aria-relevant="additions"
+                 className="label-area"
                  onClick={this.onLabelAreaClick.bind(this)}>
                 {this.state.labels.map((label: LabelInfo) => <Label key={label._id}
                                    info={label}
