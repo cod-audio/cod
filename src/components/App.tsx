@@ -9,7 +9,7 @@ import AudioPlayer from "../util/AudioPlayer";
 import Label from "./Label";
 import LabelGenerator from "./LabelGenerator";
 import LabelInfo from "../util/LabelInfo";
-import LabelLoader from "./LabelLoader";
+import LabelImporter from "./LabelImporter";
 import PageDescription from "./PageDescription";
 import Playhead from "./Playhead";
 import Style from "../util/StyleConstants";
@@ -69,81 +69,40 @@ class App extends Component<{}, AppState> {
         });
     }
 
-    // MARK: Custom accessibility navigation
-
-    isFocused = (ref: Ref) => {
-        return window && window.document.activeElement === ReactDOM.findDOMNode(ref.current);
+    // MARK: LabelGenerator
+    
+    handleApiResponse = (res: AxiosResponse) => {
+        // Get labels
+        // Call this.createLabels
     }
 
-    // Returns the index of the focused label, if any. Otherwise -1.
-    focusedLabelIndex = (): number => {
-        // Check if a label is currently focused
-        const labels = this.state.labels;
-        let i = 0;
-        for (const info of labels) {
-            // Find if the label has focus
-            if (this.isFocused(info.ref)) {
-                break;
-            }
-            i++;
-        }
-        if (i < labels.length) {
-            return i;
-        }
-        return -1;
+    // MARK: Label creation and related methods
+
+    createLabel = (x: number) => {
+        const labels = [...this.state.labels, new LabelInfo(x)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
+        this.setState({ labels });
     }
 
-    // Navigate to the next or previous matching label (if one is currently focused)
-    focusNextOrPrevMatchingLabel = (i: number, direction: ArrowKey.Left | ArrowKey.Right) => {
-        const labels = this.state.labels;
-        if (i < labels.length) {
-            const increment = direction === ArrowKey.Left ? -1 : 1;
-            const boundCondition = direction === ArrowKey.Left ?
-                                   (i: number) => i >= 0 :
-                                   (i: number) => i < labels.length;
-
-            // Find the next label with the same text
-            for (let j = i + increment; boundCondition; i += increment) {
-                if (labels[i].text === labels[j].text) {
-                    // Change focus to the matching label
-                    labels[j].ref.current.focus();
-                    break;
-                }
-            }
+    createLabels = (newLabels: Array<LabelInfo>) => {
+        // Augment label ids to avoid duplicates
+        for (let i = 0; i < newLabels.length; i++) {
+            newLabels[i]._id += i;
         }
+        const labels = [...this.state.labels, ...newLabels].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
+        this.setState({ labels });
     }
 
-    onKeyDown = (e: KeyboardEvent) => {
-        const key = e.key.toLowerCase();
-        if (key === ArrowKey.Right || key === ArrowKey.Left) {
-            // Check if the playhead area is focused
-            if (this.isFocused(this.playheadAreaRef)) {
-                e.preventDefault();
-                // Mimic slider behavior
-                switch(key) {
-                    case ArrowKey.Right:
-                        this.setPlayheadPosition(this.state.playheadPosition + this.playheadArrowKeyMovePixels);
-                        break;
-                    case ArrowKey.Left:
-                        this.setPlayheadPosition(this.state.playheadPosition - this.playheadArrowKeyMovePixels);
-                        break;
-                    default:
-                }
-            }
-        } else if (e.altKey) {
-            if (key === "l") {
-                // We only override screen reader default behavior if one of our keybinds is detected
-                e.preventDefault();
-                this.createLabel(this.state.playheadPosition);
-            } else if (key === ArrowKey.Right || key === ArrowKey.Left) {
-                // Check if a label is focused
-                let i;
-                if ((i = this.focusedLabelIndex()) !== -1) {
-                    e.preventDefault();
-                    // Label i has focus
-                    this.focusNextOrPrevMatchingLabel(i, key);
-                }
-            }
+    onLabelSelect = (e: MouseEvent | KeyboardEvent) => {
+        e.stopPropagation();
+
+        // Undefined behavior if labels are somehow selected without audio being loaded
+        if (this.state.audioBuffer) {
+            const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
+            const playheadPosition = labelRect.left - Style.AppMargin;
+            this.setState({ playheadPosition });
+
+            this.onPausePressed();
+            this.matchAudioToPlayhead();
         }
     }
     
@@ -173,47 +132,10 @@ class App extends Component<{}, AppState> {
         }
     }
 
-    getPlayheadTime = (): number => {
-        const buffer = this.state.audioBuffer;
-        if (!buffer) {
-            return 0;
-        }
-        const playheadPosition = this.state.playheadPosition;
-        const trackTimeSec = buffer.length / buffer.sampleRate;
-        const pixelsTravelledRatio = playheadPosition / Style.TrackAreaWidth;
-        return trackTimeSec * pixelsTravelledRatio * 1000;
-    }
-
     matchAudioToPlayhead() {
-        const playheadTime = this.getPlayheadTime();
+        const playheadTime = this.positionToTime(this.state.playheadPosition);
         this.state.audioPlayer.setElapsed(playheadTime);
         this.setState({ playheadTime });
-    }
-
-    // MARK: Label creation and related methods
-
-    createLabel = (x: number) => {
-        const labels = [...this.state.labels, new LabelInfo(x)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
-        this.setState({ labels });
-    }
-
-    createLabels = (newLabels: Array<LabelInfo>) => {
-        const labels = [...this.state.labels, ...newLabels].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
-        this.setState({ labels });
-    }
-
-    onLabelSelect = (e: MouseEvent | KeyboardEvent) => {
-        e.stopPropagation();
-
-        // Undefined behavior if labels are somehow selected without audio being loaded
-        if (this.state.audioBuffer) {
-            const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
-            const playheadPosition = labelRect.left - Style.AppMargin;
-            this.setState({ playheadPosition });
-
-            this.onPausePressed();
-            this.matchAudioToPlayhead();
-        }
     }
 
     onLabelAreaClick = (e: MouseEvent) => {
@@ -256,16 +178,106 @@ class App extends Component<{}, AppState> {
         }
     }
 
-    // MARK: LabelGenerator
-    // Yes, it's a bit gross to include the LabelGenerator in this file, but it needs
-    // access to this.state.labels and it would get really messy to move that to the parent
+    // MARK: Custom accessibility navigation
 
-    handleApiResponse = (res: AxiosResponse) => {
-        // Get labels
-        // Call this.createLabels
+    onKeyDown = (e: KeyboardEvent) => {
+        const key = e.key.toLowerCase();
+
+        if (e.altKey) {
+            if (key === "l") {
+                // We only override screen reader default behavior if one of our keybinds is detected
+                e.preventDefault();
+                this.createLabel(this.state.playheadPosition);
+            } else if (key === ArrowKey.Right || key === ArrowKey.Left) {
+                // Check if a label is focused
+                let i;
+                if ((i = this.focusedLabelIndex()) !== -1) {
+                    e.preventDefault();
+                    // Label i has focus
+                    this.focusNextOrPrevMatchingLabel(i, key);
+                }
+            }
+        } else if (key === ArrowKey.Right || key === ArrowKey.Left) {
+            // Check if the playhead area is focused
+            if (this.isFocused(this.playheadAreaRef)) {
+                e.preventDefault();
+                // Mimic slider behavior
+                switch(key) {
+                    case ArrowKey.Right:
+                        this.setPlayheadPosition(this.state.playheadPosition + this.playheadArrowKeyMovePixels);
+                        break;
+                    case ArrowKey.Left:
+                        this.setPlayheadPosition(this.state.playheadPosition - this.playheadArrowKeyMovePixels);
+                        break;
+                    default:
+                }
+            }
+        }
+        
     }
 
-    // MARK: Helper
+    isFocused = (ref: Ref) => {
+        return window && window.document.activeElement === ReactDOM.findDOMNode(ref.current);
+    }
+
+    // Returns the index of the focused label, if any. Otherwise -1.
+    focusedLabelIndex = (): number => {
+        // Check if a label is currently focused
+        const labels = this.state.labels;
+        let i = 0;
+        for (const info of labels) {
+            // Find if the label has focus
+            if (this.isFocused(info.ref)) {
+                break;
+            }
+            i++;
+        }
+        if (i < labels.length) {
+            return i;
+        }
+        return -1;
+    }
+
+    // Navigate to the next or previous matching label (if one is currently focused)
+    focusNextOrPrevMatchingLabel = (i: number, direction: ArrowKey.Left | ArrowKey.Right) => {
+        const labels = this.state.labels;
+        if (i < labels.length) {
+            const increment = direction === ArrowKey.Left ? -1 : 1;
+            const boundCondition = (j: number) => direction === ArrowKey.Left ? j >= 0 : j < labels.length;
+
+            // Find the next label with the same text
+            for (let j = i + increment; boundCondition; j += increment) {
+                if (labels[i].text === labels[j].text) {
+                    // Change focus to the matching label
+                    labels[j].ref.current.focus();
+                    break;
+                }
+            }
+        }
+    }
+
+    // MARK: Helpers
+
+    positionToTime = (x: number): number => {
+        const buffer = this.state.audioBuffer;
+        if (!buffer) {
+            return 0;
+        }
+        const trackTimeSec = buffer.length / buffer.sampleRate;
+        const pixelsTravelledRatio = x / Style.TrackAreaWidth;
+        return trackTimeSec * pixelsTravelledRatio * 1000;
+    }
+
+    // Parameter t is in milliseconds
+    timeToPosition = (t: number): number => {
+        const buffer = this.state.audioBuffer;
+        if (!buffer) {
+            return 0;
+        }
+        const trackTimeSec = buffer.length / buffer.sampleRate;
+        const timeRatio = t / (trackTimeSec * 1000);
+        return Math.round(timeRatio * Style.TrackAreaWidth);
+    }
 
     roundToNDigits = (n: number, digits: number): number => {
         const multiplier = Math.pow(10, digits);
@@ -277,8 +289,8 @@ class App extends Component<{}, AppState> {
                     style={{ margin: Style.AppMargin }}>
             <PageDescription/>
             <AudioLoader handleFileLoad={this.handleFileLoad}/>
-            <LabelLoader audioBuffer={this.state.audioBuffer} 
-                         onFileRead={this.createLabels.bind(this)}/>
+            <LabelImporter audioBuffer={this.state.audioBuffer} 
+                           onFileRead={this.createLabels.bind(this)}/>
             <LabelGenerator audioBuffer={this.state.audioBuffer}
                             handleApiResponse={this.handleApiResponse.bind(this)}/>
             <div className="track-area"
