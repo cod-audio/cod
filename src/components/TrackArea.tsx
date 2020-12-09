@@ -19,6 +19,7 @@ interface TrackAreaState {
     labels: Array<LabelInfo>;
     playheadIntervalId?: number;
     playheadPosition: number;
+    playheadTime: number;
 }
 
 type KeyboardEvent = React.KeyboardEvent<HTMLDivElement>;
@@ -41,7 +42,8 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     defaultState: TrackAreaState = {
         labels: [],
-        playheadPosition: 0
+        playheadPosition: 0,
+        playheadTime: 0
     };
 
     constructor(props: TrackAreaProps) {
@@ -101,7 +103,22 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
 
     onKeyDown = (e: KeyboardEvent) => {
         const key = e.key.toLowerCase();
-        if (e.altKey) {
+        if (key === ArrowKey.Right || key === ArrowKey.Left) {
+            // Check if the playhead area is focused
+            if (this.isFocused(this.playheadAreaRef)) {
+                e.preventDefault();
+                // Mimic slider behavior
+                switch(key) {
+                    case ArrowKey.Right:
+                        this.setPlayheadPosition(this.state.playheadPosition + this.playheadArrowKeyMovePixels);
+                        break;
+                    case ArrowKey.Left:
+                        this.setPlayheadPosition(this.state.playheadPosition - this.playheadArrowKeyMovePixels);
+                        break;
+                    default:
+                }
+            }
+        } else if (e.altKey) {
             if (key === "l") {
                 // We only override screen reader default behavior if one of our keybinds is detected
                 e.preventDefault();
@@ -113,20 +130,6 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
                     e.preventDefault();
                     // Label i has focus
                     this.focusNextOrPrevMatchingLabel(i, key);
-                }
-
-                // Check if the playhead area is focused
-                if (this.isFocused(this.playheadAreaRef)) {
-                    e.preventDefault();
-                    switch(key) {
-                        case ArrowKey.Right:
-                            this.setPlayheadPosition(this.state.playheadPosition + this.playheadArrowKeyMovePixels);
-                            break;
-                        case ArrowKey.Left:
-                            this.setPlayheadPosition(this.state.playheadPosition - this.playheadArrowKeyMovePixels);
-                            break;
-                        default:
-                    }
                 }
             }
         }
@@ -147,16 +150,7 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
             this.setState({ playheadPosition });
 
             this.onPausePressed();
-            this.matchAudioToPlayhead(playheadPosition);
-        }
-    }
-
-    matchAudioToPlayhead(playheadPosition: number) {
-        const buffer = this.props.audioBuffer;
-        if (buffer) {
-            const trackTimeSec = buffer.length / buffer.sampleRate;
-            const pixelsTravelledRatio = playheadPosition / Style.TrackAreaWidth;
-            this.props.audioPlayer.setElapsed(trackTimeSec * pixelsTravelledRatio * 1000);
+            this.matchAudioToPlayhead();
         }
     }
 
@@ -165,6 +159,23 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         if (e.pageX) {
             this.setPlayheadPosition(e.pageX - e.currentTarget.offsetLeft);
         }
+    }
+
+    getPlayheadTime = (): number => {
+        const buffer = this.props.audioBuffer;
+        if (!buffer) {
+            return 0;
+        }
+        const playheadPosition = this.state.playheadPosition;
+        const trackTimeSec = buffer.length / buffer.sampleRate;
+        const pixelsTravelledRatio = playheadPosition / Style.TrackAreaWidth;
+        return trackTimeSec * pixelsTravelledRatio * 1000;
+    }
+
+    matchAudioToPlayhead() {
+        const playheadTime = this.getPlayheadTime();
+        this.props.audioPlayer.setElapsed(playheadTime);
+        this.setState({ playheadTime });
     }
 
     // MARK: Label creation and related methods
@@ -185,7 +196,7 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
             this.setState({ playheadPosition });
 
             this.onPausePressed();
-            this.matchAudioToPlayhead(playheadPosition);
+            this.matchAudioToPlayhead();
         }
     }
 
@@ -229,6 +240,13 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
         }
     }
 
+    // MARK: Helper
+
+    roundToNDigits = (n: number, digits: number): number => {
+        const multiplier = Math.pow(10, digits);
+        return Math.round(((n) + Number.EPSILON) * multiplier) / multiplier;
+    }
+
     render() {
         return <div className="track-area"
                     style={{ width: Style.TrackAreaWidth }}>
@@ -238,10 +256,14 @@ class TrackArea extends Component<TrackAreaProps, TrackAreaState> {
                                    info={label}
                                    onSelectHandler={this.onLabelSelect.bind(this)}/>)}
             </div>
-            <div className="playhead-area"
+            <div aria-label="playhead"
+                 aria-valuenow={+((this.state.playheadTime / 1000).toFixed(2))}
+                 aria-valuetext={`${(this.state.playheadTime / 1000).toFixed(2)} seconds`}
+                 className="playhead-area"
                  onClick={this.onPlayheadAreaClick.bind(this)}
                  ref={this.playheadAreaRef}
-                 tabIndex={0}>
+                 role="slider"
+                 tabIndex={this.props.audioBuffer ? 0 : -1}>
                 {this.props.audioBuffer ? <Playhead x={this.state.playheadPosition}/> : null}
             </div>
             <div className="waveform-area">

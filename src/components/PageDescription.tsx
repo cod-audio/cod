@@ -20,7 +20,7 @@ class PageDescription extends Component<{}, {}> {
             <ol>
                 <li>Press enter on the play button to play or pause the audio.</li>
                 <li>
-                    Press alt + the left and right arrow keys while the playhead 
+                    Press the left and right arrow keys while the playhead 
                     is focused to move the playhead.
                 </li>
                 <li>Press alt + L to create a new label at the playhead location.</li>
