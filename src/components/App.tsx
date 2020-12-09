@@ -301,7 +301,7 @@ class App extends Component<{}, AppState> {
         return <main className="App"
                     style={{ margin: Style.AppMargin }}>
             <PageDescription/>
-            <AudioLoader handleFileLoad={this.handleFileLoad}/>
+            {this.state.audioBuffer ? null : <AudioLoader handleFileLoad={this.handleFileLoad}/>}
             <LabelImporter audioBuffer={this.state.audioBuffer} 
                            onFileRead={this.createLabels.bind(this)}/>
             <LabelGenerator audioBuffer={this.state.audioBuffer}
