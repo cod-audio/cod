@@ -299,9 +299,11 @@ class App extends Component<{}, AppState> {
                      aria-relevant="additions"
                      className="label-area"
                      onClick={this.onLabelAreaClick.bind(this)}>
-                     {this.state.labels.map((label: LabelInfo) => <Label key={label._id}
+                     {this.state.labels.map((label: LabelInfo) => label.x <= Style.TrackAreaWidth ? 
+                                                                  <Label key={label._id}
                                                                          info={label}
-                                                                         onSelectHandler={this.onLabelSelect.bind(this)}/>)}
+                                                                         onSelectHandler={this.onLabelSelect.bind(this)}/>
+                                                                  : null)}
                 </div>
                 <div aria-label="playhead"
                      aria-valuenow={+((this.state.playheadTime / 1000).toFixed(2))}
