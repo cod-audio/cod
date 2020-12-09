@@ -3,8 +3,10 @@ import ReactDOM from "react-dom";
 import "./Label.css";
 
 import LabelInfo from "../util/LabelInfo";
+import Style from "../util/StyleConstants";
 
 interface LabelProps {
+    audioBuffer?: AudioBuffer;
     info: LabelInfo;
     onSelectHandler: (e: React.MouseEvent<HTMLDivElement, MouseEvent> | React.KeyboardEvent<HTMLDivElement>) => void;
     toggleDisableCreateLabel: (createLabelDisabled: boolean) => void;
@@ -85,6 +87,24 @@ class Label extends Component<LabelProps, LabelState> {
         this.setState({ text: e.currentTarget.value });
     }
 
+    positionToTime = (x: number): number => {
+        const buffer = this.props.audioBuffer;
+        if (!buffer) {
+            return 0;
+        }
+        const trackTimeSec = buffer.length / buffer.sampleRate;
+        const pixelsTravelledRatio = x / Style.TrackAreaWidth;
+        return trackTimeSec * pixelsTravelledRatio;
+    }
+
+    ariaLabel = () => {
+        const labelTime = this.positionToTime(this.props.info.x);
+        const seconds = labelTime.toFixed(0);
+        const tenths = ((labelTime % 1) * 10).toFixed(0);
+        const hundredths = ((labelTime % 0.1) * 100).toFixed(0);
+        return `${this.state.text} at ${seconds} point ${tenths} ${hundredths} seconds`;
+    }
+
     render() {
         return this.state.editing ? 
                <input className="label-edit"
@@ -94,7 +114,7 @@ class Label extends Component<LabelProps, LabelState> {
                       style={{ left: this.props.info.x }}
                       type="text"
                       value={this.state.text}/> :
-               <div aria-label={`Label ${this.state.text}`}
+               <div aria-label={this.ariaLabel()}
                     className="label"
                     onClick={this.props.onSelectHandler}
                     onKeyDown={this.runOnSelectHandlerOnEnter}

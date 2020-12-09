@@ -318,7 +318,8 @@ class App extends Component<{}, AppState> {
                      className="label-area"
                      onClick={this.onLabelAreaClick.bind(this)}>
                      {this.state.labels.map((label: LabelInfo) => label.x <= Style.TrackAreaWidth ? 
-                                                                  <Label key={label._id}
+                                                                  <Label audioBuffer={this.state.audioBuffer}
+                                                                         key={label._id}
                                                                          info={label}
                                                                          onSelectHandler={this.onLabelSelect.bind(this)}
                                                                          toggleDisableCreateLabel={this.toggleDisableCreateLabel.bind(this)}/>
