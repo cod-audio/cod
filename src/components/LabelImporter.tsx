@@ -2,21 +2,22 @@ import React, { Component } from "react";
 import "./AudioLoader.css";
 
 import LabelInfo from "../util/LabelInfo";
+import Style from "../util/StyleConstants";
 
-interface LabelLoaderProps {
+interface LabelImporterProps {
     audioBuffer?: AudioBuffer;
     onFileRead: (labels: Array<LabelInfo>) => void;
 }
 
-interface LabelLoaderState {}
+interface LabelImporterState {}
 
-class LabelLoader extends Component<LabelLoaderProps, LabelLoaderState> {
+class LabelImporter extends Component<LabelImporterProps, LabelImporterState> {
 
     fileReader: FileReader;
 
-    defaultState: LabelLoaderState = {};
+    defaultState: LabelImporterState = {};
 
-    constructor(props: LabelLoaderProps) {
+    constructor(props: LabelImporterProps) {
         super(props);
         this.state = this.defaultState;
 
@@ -28,18 +29,31 @@ class LabelLoader extends Component<LabelLoaderProps, LabelLoaderState> {
         }
     }
 
+    // Parameter t is in milliseconds
+    timeToPosition = (t: number): number => {
+        const buffer = this.props.audioBuffer;
+        if (!buffer) {
+            return 0;
+        }
+        const trackTimeSec = buffer.length / buffer.sampleRate;
+        const timeRatio = t / (trackTimeSec * 1000);
+        return Math.round(timeRatio * Style.TrackAreaWidth);
+    }
+
     processLabelFile = (fileContent: string): Array<LabelInfo | null> => {
         return fileContent.split("\n").map((line: string) => {
-            const words = line.split("&#x2192");
+            const words = line.split("→");
             const startTime = Number.parseFloat(words[0].trim());
             if (Number.isNaN(startTime)) {
                 return null;
             }
-            return new LabelInfo(startTime);
+            const text = words[2].trim();
+            return new LabelInfo(this.timeToPosition(startTime * 1000), text);
         });
     }
 
     render() {
+        // Disable this feature for now
         return this.props.audioBuffer ?
                 <input accept=".txt"
                        name="file"
@@ -50,4 +64,4 @@ class LabelLoader extends Component<LabelLoaderProps, LabelLoaderState> {
 
 }
 
-export default LabelLoader;
+export default LabelImporter;
