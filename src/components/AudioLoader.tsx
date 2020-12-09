@@ -33,10 +33,15 @@ class AudioLoader extends Component<AudioLoaderProps, AudioLoaderState> {
     }
 
     render() {
-        return <input type="file"
-                      name="file"
-                      accept=".wav, .mp3, .m4a, .pcm, .aiff, .aac"
-                      onChange={e => this.fileReader.readAsArrayBuffer(e.target.files?.[0])}/>;
+        return <div>
+            <button onClick={() => document.getElementById("audio-importer").click()}>Import Audio</button>
+            <input accept=".wav, .mp3, .m4a, .pcm, .aiff, .aac"
+                   id="audio-importer"
+                   name="file"
+                   onChange={e => this.fileReader.readAsArrayBuffer(e.target.files?.[0])}
+                   style={{ display: "none" }}
+                   type="file"/>
+        </div>;
     }
 
 }

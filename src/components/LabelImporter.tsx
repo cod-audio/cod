@@ -53,13 +53,15 @@ class LabelImporter extends Component<LabelImporterProps, LabelImporterState> {
     }
 
     render() {
-        // Disable this feature for now
-        return this.props.audioBuffer ?
+        return this.props.audioBuffer ? <div>
+                <button onClick={() => document.getElementById("label-importer").click()}>Import Labels</button>
                 <input accept=".txt"
+                       id="label-importer"
                        name="file"
                        onChange={e => this.fileReader.readAsText(e.target.files?.[0])}
+                       style={{ display: "none" }}
                        type="file"/>
-               : null;
+            </div> : null;
     }
 
 }
