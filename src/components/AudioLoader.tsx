@@ -7,6 +7,8 @@ interface AudioLoaderProps {
 
 interface AudioLoaderState {}
 
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+
 class AudioLoader extends Component<AudioLoaderProps, AudioLoaderState> {
 
     context: AudioContext;
