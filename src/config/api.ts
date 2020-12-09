@@ -1,3 +1,3 @@
 export default {
-    url: ""
+    url: "https://nu-cod-api.herokuapp.com"
 };
