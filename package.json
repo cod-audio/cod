@@ -2,8 +2,8 @@
   "name": "cod",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://cooperbarth.github.io/cod",
   "dependencies": {
-    "@types/axios": "^0.14.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
     "axios": "^0.21.0",
@@ -14,10 +14,13 @@
   "scripts": {
     "start": "webpack serve",
     "build": "webpack",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "devDependencies": {
     "css-loader": "^5.0.1",
+    "gh-pages": "^3.1.0",
     "html-webpack-plugin": "^4.5.0",
     "style-loader": "^2.0.0",
     "ts-loader": "^8.0.11",
