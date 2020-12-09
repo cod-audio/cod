@@ -28,11 +28,11 @@ type KeyboardEvent = React.KeyboardEvent<HTMLDivElement>;
 type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
 type Ref = React.RefObject<HTMLDivElement>;
 
-enum ArrowKey {
-    Up = "arrowup",
-    Down = "arrowdown",
+enum Key {
     Left = "arrowleft",
-    Right = "arrowright"
+    Right = "arrowright",
+    Backspace = "backspace",
+    Delete = "delete"
 }
 
 class App extends Component<{}, AppState> {
@@ -92,6 +92,12 @@ class App extends Component<{}, AppState> {
         this.setState({ labels });
     }
 
+    deleteLabel = (i: number) => {
+        const labels = this.state.labels;
+        labels.splice(i, 1);
+        this.setState({ labels });
+    }
+
     onLabelSelect = (e: MouseEvent | KeyboardEvent) => {
         e.stopPropagation();
 
@@ -103,6 +109,13 @@ class App extends Component<{}, AppState> {
 
             this.onPausePressed();
             this.matchAudioToPlayhead();
+        }
+    }
+
+    onLabelAreaClick = (e: MouseEvent) => {
+        // Labels shouldn't be created without audio loaded
+        if (this.state.audioBuffer) {
+            this.createLabel(e.pageX - e.currentTarget.offsetLeft);
         }
     }
     
@@ -136,13 +149,6 @@ class App extends Component<{}, AppState> {
         const playheadTime = this.positionToTime(this.state.playheadPosition);
         this.state.audioPlayer.setElapsed(playheadTime);
         this.setState({ playheadTime });
-    }
-
-    onLabelAreaClick = (e: MouseEvent) => {
-        // Labels shouldn't be created without audio loaded
-        if (this.state.audioBuffer) {
-            this.createLabel(e.pageX - e.currentTarget.offsetLeft);
-        }
     }
 
     // MARK: Audio playing
@@ -188,7 +194,7 @@ class App extends Component<{}, AppState> {
                 // We only override screen reader default behavior if one of our keybinds is detected
                 e.preventDefault();
                 this.createLabel(this.state.playheadPosition);
-            } else if (key === ArrowKey.Right || key === ArrowKey.Left) {
+            } else if (key === Key.Right || key === Key.Left) {
                 // Check if a label is focused
                 let i;
                 if ((i = this.focusedLabelIndex()) !== -1) {
@@ -197,20 +203,27 @@ class App extends Component<{}, AppState> {
                     this.focusNextOrPrevMatchingLabel(i, key);
                 }
             }
-        } else if (key === ArrowKey.Right || key === ArrowKey.Left) {
+        } else if (key === Key.Right || key === Key.Left) {
             // Check if the playhead area is focused
             if (this.isFocused(this.playheadAreaRef)) {
                 e.preventDefault();
                 // Mimic slider behavior
                 switch(key) {
-                    case ArrowKey.Right:
+                    case Key.Right:
                         this.setPlayheadPosition(this.state.playheadPosition + this.playheadArrowKeyMovePixels);
                         break;
-                    case ArrowKey.Left:
+                    case Key.Left:
                         this.setPlayheadPosition(this.state.playheadPosition - this.playheadArrowKeyMovePixels);
                         break;
                     default:
                 }
+            }
+        } else if (key === Key.Backspace || key === Key.Delete) {
+            let i;
+            if ((i = this.focusedLabelIndex()) !== -1) {
+                e.preventDefault();
+                // Label i has focus
+                this.deleteLabel(i);
             }
         }
         
@@ -239,11 +252,11 @@ class App extends Component<{}, AppState> {
     }
 
     // Navigate to the next or previous matching label (if one is currently focused)
-    focusNextOrPrevMatchingLabel = (i: number, direction: ArrowKey.Left | ArrowKey.Right) => {
+    focusNextOrPrevMatchingLabel = (i: number, direction: Key.Left | Key.Right) => {
         const labels = this.state.labels;
         if (i < labels.length) {
-            const increment = direction === ArrowKey.Left ? -1 : 1;
-            const boundCondition = (j: number) => direction === ArrowKey.Left ? j >= 0 : j < labels.length;
+            const increment = direction === Key.Left ? -1 : 1;
+            const boundCondition = (j: number) => direction === Key.Left ? j >= 0 : j < labels.length;
 
             // Find the next label with the same text
             for (let j = i + increment; boundCondition; j += increment) {
