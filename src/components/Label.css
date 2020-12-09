@@ -13,3 +13,8 @@
 .label :focus {
     outline: 2px solid black;
 }
+
+.label-edit {
+    position: absolute;
+    margin-left: 8px;
+}

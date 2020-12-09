@@ -29,7 +29,7 @@ class PageDescription extends Component<{}, {}> {
                     Press alt + the left and right arrow keys while a label is 
                     selected to focus the next or previous label with the same name.
                 </li>
-                <li>Press delete or backspace to remove the focused label.</li>
+                <li>Press delete to remove the focused label.</li>
             </ol>
         </section>
     }

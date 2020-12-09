@@ -18,6 +18,7 @@ import Waveform from "./Waveform";
 interface AppState {
     audioBuffer?: AudioBuffer;
     audioPlayer: AudioPlayer;
+    createLabelDisabled: boolean;
     labels: Array<LabelInfo>;
     playheadIntervalId?: number;
     playheadPosition: number;
@@ -26,24 +27,24 @@ interface AppState {
 
 type KeyboardEvent = React.KeyboardEvent<HTMLDivElement>;
 type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
-type Ref = React.RefObject<HTMLDivElement>;
 
 enum Key {
+    L = "l",
     Left = "arrowleft",
     Right = "arrowright",
-    Backspace = "backspace",
     Delete = "delete"
 }
 
 class App extends Component<{}, AppState> {
 
-    playheadAreaRef: Ref;
+    playheadAreaRef: React.RefObject<HTMLDivElement>;
     playheadArrowKeyMovePixels: number = 5;
     playheadStepInterval?: number;
     playheadStepSizeMs = 5;
 
     defaultState: AppState = {
         audioPlayer: new AudioPlayer(),
+        createLabelDisabled: false,
         labels: [],
         playheadPosition: 0,
         playheadTime: 0
@@ -79,8 +80,10 @@ class App extends Component<{}, AppState> {
     // MARK: Label creation and related methods
 
     createLabel = (x: number) => {
-        const labels = [...this.state.labels, new LabelInfo(x)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
-        this.setState({ labels });
+        if (!this.state.createLabelDisabled) {
+            const labels = [...this.state.labels, new LabelInfo(x)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
+            this.setState({ labels });
+        }
     }
 
     createLabels = (newLabels: Array<LabelInfo>) => {
@@ -118,6 +121,8 @@ class App extends Component<{}, AppState> {
             this.createLabel(e.pageX - e.currentTarget.offsetLeft);
         }
     }
+
+    toggleDisableCreateLabel = (createLabelDisabled: boolean) => this.setState({ createLabelDisabled });
     
     // MARK: Playhead movement and related methods
 
@@ -190,7 +195,7 @@ class App extends Component<{}, AppState> {
         const key = e.key.toLowerCase();
 
         if (e.altKey) {
-            if (key === "l") {
+            if (key === Key.L) {
                 // We only override screen reader default behavior if one of our keybinds is detected
                 e.preventDefault();
                 this.createLabel(this.state.playheadPosition);
@@ -218,7 +223,7 @@ class App extends Component<{}, AppState> {
                     default:
                 }
             }
-        } else if (key === Key.Backspace || key === Key.Delete) {
+        } else if (key === Key.Delete) {
             let i;
             if ((i = this.focusedLabelIndex()) !== -1) {
                 e.preventDefault();
@@ -229,7 +234,7 @@ class App extends Component<{}, AppState> {
         
     }
 
-    isFocused = (ref: Ref) => {
+    isFocused = (ref: React.RefObject<HTMLDivElement>) => {
         return window && window.document.activeElement === ReactDOM.findDOMNode(ref.current);
     }
 
@@ -315,7 +320,8 @@ class App extends Component<{}, AppState> {
                      {this.state.labels.map((label: LabelInfo) => label.x <= Style.TrackAreaWidth ? 
                                                                   <Label key={label._id}
                                                                          info={label}
-                                                                         onSelectHandler={this.onLabelSelect.bind(this)}/>
+                                                                         onSelectHandler={this.onLabelSelect.bind(this)}
+                                                                         toggleDisableCreateLabel={this.toggleDisableCreateLabel.bind(this)}/>
                                                                   : null)}
                 </div>
                 <div aria-label="playhead"
