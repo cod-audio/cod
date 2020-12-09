@@ -20,22 +20,26 @@ class LabelLoader extends Component<LabelLoaderProps, LabelLoaderState> {
         this.fileReader = new FileReader();
 
         this.fileReader.onloadend = (_: ProgressEvent<FileReader>) => {
-            // this.processLabelFile(this.fileReader.result as string);
+            this.processLabelFile(this.fileReader.result as string);
         }
     }
 
-    /* processLabelFile = (fileContent: string): Array<LabelInfo> => {
+    processLabelFile = (fileContent: string): Array<LabelInfo | null> => {
         return fileContent.split("\n").map((line: string) => {
-            return new LabelInfo(0); //TODO: This
+            const words = line.split("&#x2192");
+            const startTime = Number.parseFloat(words[0].trim());
+            if (Number.isNaN(startTime)) {
+                return null;
+            }
+            return new LabelInfo(startTime, React.createRef());
         });
-    } */
+    }
 
-    // TODO: Disable FileReader if no audio is loaded
     render() {
-        return <input type="file"
+        return <input accept=".txt"
                       name="file"
-                      accept=".txt"
-                      onChange={e => this.fileReader.readAsText(e.target.files?.[0])}/>;
+                      onChange={e => this.fileReader.readAsText(e.target.files?.[0])}
+                      type="file"/>;
     }
 
 }

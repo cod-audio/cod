@@ -1,5 +1,7 @@
 import Timer from "./Timer";
 
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+
 class AudioPlayer {
 
     private audioBuffer?: AudioBuffer;
@@ -10,7 +12,7 @@ class AudioPlayer {
     private timer: Timer;
 
     constructor() {
-        this.context = new window.AudioContext();
+        this.context = new AudioContext();
         this.timer = new Timer();
     }
 
