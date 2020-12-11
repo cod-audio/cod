@@ -45,7 +45,8 @@ class LabelGenerator extends Component<LabelGeneratorProps, LabelGeneratorState>
             <button disabled={this.state.disabled}
                     onClick={this.getLabels}
             >Generate Labels</button>
-            <div hidden={!this.state.disabled}>Loading...</div>
+            <div aria-live="polite"
+                 hidden={!this.state.disabled}>Loading...</div>
         </span> : null;
     }
 

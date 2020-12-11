@@ -42,7 +42,7 @@ class Label extends Component<LabelProps, LabelState> {
         window.addEventListener("keydown", this.onKeyDown.bind(this));
     }
 
-    isFocused = () => window && window.document.activeElement === ReactDOM.findDOMNode(this.props.info.ref.current);
+    labelIsFocused = () => window && window.document.activeElement === ReactDOM.findDOMNode(this.props.info.ref.current);
 
     textInputIsFocused = () => window && window.document.activeElement === ReactDOM.findDOMNode(this.inputRef.current);
 
@@ -66,12 +66,14 @@ class Label extends Component<LabelProps, LabelState> {
     }
 
     onKeyDown = (e: KeyboardEvent) => {
-        if (this.isFocused() && e.altKey && e.key.toLowerCase() === Key.E) {
-            e.preventDefault();
-            if (this.state.editing) {
-                this.focusLabel();
-            } else {
-                this.focusInput();
+        if (this.labelIsFocused() || this.textInputIsFocused()) {
+            if (e.altKey && e.key.toLowerCase() === Key.E) {
+                e.preventDefault();
+                if (this.state.editing) {
+                    this.focusLabel();
+                } else {
+                    this.focusInput();
+                }
             }
         }
     }
@@ -111,6 +113,7 @@ class Label extends Component<LabelProps, LabelState> {
                       onChange={e => this.setText(e)}
                       onBlur={this.onBlur}
                       ref={this.inputRef}
+                      role="application"
                       style={{ left: this.props.info.x }}
                       type="text"
                       value={this.state.text}/> :

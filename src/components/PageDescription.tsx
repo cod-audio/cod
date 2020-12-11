@@ -25,8 +25,8 @@ class PageDescription extends Component<{}, {}> {
                 </li>
                 <li>Press alt + L to create a new label at the playhead location.</li>
                 <li>
-                    Press alt + E to begin editing a label. Tab or click away from the 
-                    label to save your edits.
+                    Press alt + E to begin editing a label. Press this keybind again 
+                    or navigate away from the label to save your edits.
                 </li>
                 <li>Press delete to remove the focused label.</li>
                 <li>Press enter on a label to move the playhead to that location.</li>
