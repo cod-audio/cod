@@ -41,9 +41,12 @@ class LabelGenerator extends Component<LabelGeneratorProps, LabelGeneratorState>
 
     render() {
         return this.props.audioBuffer ? 
-               <button disabled={this.state.disabled}
-                       onClick={this.getLabels}
-               >Generate Labels</button> : null;
+        <span>
+            <button disabled={this.state.disabled}
+                    onClick={this.getLabels}
+            >Generate Labels</button>
+            <div hidden={!this.state.disabled}>Loading...</div>
+        </span> : null;
     }
 
 }
