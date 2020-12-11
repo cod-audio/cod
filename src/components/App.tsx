@@ -160,8 +160,9 @@ class App extends Component<{}, AppState> {
 
     matchAudioToPlayhead() {
         const playheadTime = this.positionToTime(this.state.playheadPosition);
-        this.setState({ playheadTime });
-        this.state.audioPlayer.setElapsed(playheadTime);
+        this.setState({ playheadTime }, () => {
+            this.state.audioPlayer.setElapsed(playheadTime);
+        });
     }
 
     onPlayheadAreaClick = (e: MouseEvent) => {
@@ -195,10 +196,11 @@ class App extends Component<{}, AppState> {
             this.playheadStepInterval = this.calculateInterval();
             this.state.audioPlayer.play();
             const playheadIntervalId = window.setInterval(() => {
-                this.setState({ playheadPosition: this.state.playheadPosition + this.playheadStepInterval || 0 });
-                if (this.state.playheadPosition >= Style.TrackAreaWidth) {
-                    this.onPausePressed();
-                }
+                this.setState({ playheadPosition: this.state.playheadPosition + this.playheadStepInterval || 0 }, () => {
+                    if (this.state.playheadPosition >= Style.TrackAreaWidth) {
+                        this.onPausePressed();
+                    }
+                });
             }, this.playheadStepSizeMs);
             this.setState({ playheadIntervalId });
         }
@@ -244,10 +246,10 @@ class App extends Component<{}, AppState> {
                             label.ref.current.focus();
 
                             const playheadPosition = label.ref.current.getBoundingClientRect().left - Style.AppMargin;
-                            this.setState({ playheadPosition });
-
-                            this.onPausePressed();
-                            this.matchAudioToPlayhead();
+                            this.setState({ playheadPosition }, () => {
+                                this.onPausePressed();
+                                this.matchAudioToPlayhead();
+                            });
                             break;
                         }
                     }
