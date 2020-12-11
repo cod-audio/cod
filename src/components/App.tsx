@@ -35,6 +35,7 @@ enum Key {
     Delete = "delete",
     L = "l",
     Left = "arrowleft",
+    N = "n",
     P = "p",
     Right = "arrowright"
 }
@@ -230,6 +231,25 @@ class App extends Component<{}, AppState> {
                         this.onPausePressed();
                     } else {
                         this.onPlayPressed();
+                    }
+                }
+            } else if (key === Key.N) {
+                const labels = this.state.labels;
+                if (this.state.audioBuffer && labels.length > 0) {
+                    e.preventDefault();
+                    // Focus the most recent label and move the playhead to it
+                    for (let i = labels.length - 1; i >= 0; i--) {
+                        if (labels[i].x <= this.state.playheadPosition) {
+                            const label = labels[i];
+                            label.ref.current.focus();
+
+                            const playheadPosition = label.ref.current.getBoundingClientRect().left - Style.AppMargin;
+                            this.setState({ playheadPosition });
+
+                            this.onPausePressed();
+                            this.matchAudioToPlayhead();
+                            break;
+                        }
                     }
                 }
             }

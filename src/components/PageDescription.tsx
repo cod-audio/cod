@@ -23,13 +23,17 @@ class PageDescription extends Component<{}, {}> {
                     Press the left and right arrow keys while the playhead 
                     is focused to move the playhead.
                 </li>
+                <li>Press enter on a label to move the playhead to that location.</li>
                 <li>Press alt + L to create a new label at the playhead location.</li>
                 <li>
                     Press alt + E to begin editing a label. Press this keybind again 
                     or navigate away from the label to save your edits.
                 </li>
                 <li>Press delete to remove the focused label.</li>
-                <li>Press enter on a label to move the playhead to that location.</li>
+                <li>
+                    Press alt + N to jump the playhead to the previous label and focus 
+                    that label.
+                </li>
                 <li>
                     Press alt + the left and right arrow keys while a label is 
                     selected to focus the next or previous label with the same name.
