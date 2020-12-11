@@ -151,11 +151,17 @@ class App extends Component<{}, AppState> {
         if (this.state.audioBuffer) {
             // const playheadPosition = Math.min(Math.max(x - Style.AppMargin + (Style.PlayheadWidth / 2) + 1, 0), Style.AppMargin + Style.TrackAreaWidth);
             const playheadPosition = Math.max(x - Style.AppMargin + (Style.PlayheadWidth / 2) + 1, 0);
-            this.setState({ playheadPosition });
-
-            this.onPausePressed();
-            this.matchAudioToPlayhead();
+            this.setState({ playheadPosition }, () => {
+                this.onPausePressed();
+                this.matchAudioToPlayhead();
+            });
         }
+    }
+
+    matchAudioToPlayhead() {
+        const playheadTime = this.positionToTime(this.state.playheadPosition);
+        this.setState({ playheadTime });
+        this.state.audioPlayer.setElapsed(playheadTime);
     }
 
     onPlayheadAreaClick = (e: MouseEvent) => {
@@ -163,12 +169,6 @@ class App extends Component<{}, AppState> {
         if (e.pageX) {
             this.setPlayheadPosition(e.pageX - e.currentTarget.offsetLeft);
         }
-    }
-
-    matchAudioToPlayhead() {
-        const playheadTime = this.positionToTime(this.state.playheadPosition);
-        this.state.audioPlayer.setElapsed(playheadTime);
-        this.setState({ playheadTime });
     }
 
     // MARK: Audio playing
