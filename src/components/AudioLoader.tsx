@@ -37,7 +37,7 @@ class AudioLoader extends Component<AudioLoaderProps, AudioLoaderState> {
     render() {
         return <div>
             <button onClick={() => document.getElementById("audio-importer").click()}>Import Audio</button>
-            <input accept=".wav, .mp3, .m4a, .pcm, .aiff, .aac"
+            <input accept=".wav, .mp3, .m4a, .pcm, .aiff, .aac, .mov"
                    id="audio-importer"
                    name="file"
                    onChange={e => this.fileReader.readAsArrayBuffer(e.target.files?.[0])}
