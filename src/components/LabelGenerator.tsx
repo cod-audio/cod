@@ -24,11 +24,11 @@ class LabelGenerator extends Component<LabelGeneratorProps, LabelGeneratorState>
 
     getLabels = () => {
         this.setState({ disabled: true });
-        // axios.post(`${api.url}/api/label-track`, {
-        axios.post(`${api.dev}/api/label-track`, {
+        axios.post(`${api.url}/api/label-track`, {
+        // axios.post(`${api.dev}/api/label-track`, {
             buffer: this.props.audioBuffer.getChannelData(0),
             sampleRate: this.props.audioBuffer.sampleRate
-        }, { 
+        }, {
             headers: { "Content-Type": "application/json" }
         }).then((res: AxiosResponse) => {
             this.setState({ disabled: false });

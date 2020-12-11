@@ -24,15 +24,15 @@ class PageDescription extends Component<{}, {}> {
                     is focused to move the playhead.
                 </li>
                 <li>Press alt + L to create a new label at the playhead location.</li>
+                <li>
+                    Press alt + E to begin editing a label. Tab or click away from the 
+                    label to save your edits.
+                </li>
                 <li>Press delete to remove the focused label.</li>
                 <li>Press enter on a label to move the playhead to that location.</li>
                 <li>
                     Press alt + the left and right arrow keys while a label is 
                     selected to focus the next or previous label with the same name.
-                </li>
-                <li>
-                    Press alt + E to begin editing a label. Tab or click away from the 
-                    label to save your edits.
                 </li>
             </ol>
         </section>
