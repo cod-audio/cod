@@ -123,10 +123,10 @@ class App extends Component<{}, AppState> {
         if (this.state.audioBuffer) {
             const labelRect: DOMRect = e.currentTarget.getBoundingClientRect();
             const playheadPosition = labelRect.left - Style.AppMargin;
-            this.setState({ playheadPosition });
-
-            this.onPausePressed();
-            this.matchAudioToPlayhead();
+            this.setState({ playheadPosition }, () => {
+                this.onPausePressed();
+                this.matchAudioToPlayhead();
+            });
         }
     }
 
