@@ -18,7 +18,7 @@ class PageDescription extends Component<{}, {}> {
             </p>
             <h3>Keyboard Navigation:</h3>
             <ol>
-                <li>Press enter on the play button to play or pause the audio.</li>
+                <li>Select the play button or press alt + P to play or pause the audio.</li>
                 <li>
                     Press the left and right arrow keys while the playhead 
                     is focused to move the playhead.

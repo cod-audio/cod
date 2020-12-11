@@ -32,10 +32,11 @@ type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
 type LabelData = { label: string, start: number };
 
 enum Key {
+    Delete = "delete",
     L = "l",
     Left = "arrowleft",
-    Right = "arrowright",
-    Delete = "delete"
+    P = "p",
+    Right = "arrowright"
 }
 
 class App extends Component<{}, AppState> {
@@ -90,10 +91,12 @@ class App extends Component<{}, AppState> {
 
     // MARK: Label creation and related methods
 
-    createLabel = (x: number) => {
+    createLabel = (x: number): React.RefObject<HTMLDivElement> | undefined => {
         if (!this.state.createLabelDisabled) {
-            const labels = [...this.state.labels, new LabelInfo(x)].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
+            const newLabel = new LabelInfo(x);
+            const labels = [...this.state.labels, newLabel].sort((a: LabelInfo, b: LabelInfo) => a.x - b.x);
             this.setState({ labels });
+            return newLabel.ref;
         }
     }
 
@@ -209,7 +212,10 @@ class App extends Component<{}, AppState> {
             if (key === Key.L) {
                 // We only override screen reader default behavior if one of our keybinds is detected
                 e.preventDefault();
-                this.createLabel(this.state.playheadPosition);
+                let ref: React.RefObject<HTMLDivElement>;
+                if (ref = this.createLabel(this.state.playheadPosition)) {
+                    ref.current.focus();
+                }
             } else if (key === Key.Right || key === Key.Left) {
                 // Check if a label is focused
                 let i;
@@ -217,6 +223,14 @@ class App extends Component<{}, AppState> {
                     e.preventDefault();
                     // Label i has focus
                     this.focusNextOrPrevMatchingLabel(i, key);
+                }
+            } else if (key === Key.P) {
+                if (this.state.audioBuffer && window) {
+                    if (this.state.audioPlayer.getIsPlaying()) {
+                        this.onPausePressed();
+                    } else {
+                        this.onPlayPressed();
+                    }
                 }
             }
         } else if (key === Key.Right || key === Key.Left) {
