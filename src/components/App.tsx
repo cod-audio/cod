@@ -32,7 +32,7 @@ type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
 type LabelData = { label: string, start: number };
 
 enum Key {
-    Delete = "delete",
+    D = "d",
     L = "l",
     Left = "arrowleft",
     N = "n",
@@ -252,6 +252,13 @@ class App extends Component<{}, AppState> {
                         }
                     }
                 }
+            } else if (key === Key.D) {
+                let i;
+                if ((i = this.focusedLabelIndex()) !== -1) {
+                    e.preventDefault();
+                    // Label i has focus
+                    this.deleteLabel(i);
+                }
             }
         } else if (key === Key.Right || key === Key.Left) {
             // Check if the playhead area is focused
@@ -268,15 +275,7 @@ class App extends Component<{}, AppState> {
                     default:
                 }
             }
-        } else if (key === Key.Delete) {
-            let i;
-            if ((i = this.focusedLabelIndex()) !== -1) {
-                e.preventDefault();
-                // Label i has focus
-                this.deleteLabel(i);
-            }
         }
-        
     }
 
     isFocused = (ref: React.RefObject<HTMLDivElement>) => {

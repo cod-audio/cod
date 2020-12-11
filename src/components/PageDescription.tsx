@@ -29,7 +29,7 @@ class PageDescription extends Component<{}, {}> {
                     Press alt + E to begin editing a label. Press this keybind again 
                     or navigate away from the label to save your edits.
                 </li>
-                <li>Press delete to remove the focused label.</li>
+                <li>Press alt + D to remove the focused label.</li>
                 <li>
                     Press alt + N to jump the playhead to the previous label and focus 
                     that label.
