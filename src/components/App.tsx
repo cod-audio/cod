@@ -28,6 +28,9 @@ interface AppState {
 type KeyboardEvent = React.KeyboardEvent<HTMLDivElement>;
 type MouseEvent = React.MouseEvent<HTMLDivElement, MouseEvent>;
 
+
+type LabelData = { label: string, start: number };
+
 enum Key {
     L = "l",
     Left = "arrowleft",
@@ -71,10 +74,18 @@ class App extends Component<{}, AppState> {
     }
 
     // MARK: LabelGenerator
-    
+
     handleApiResponse = (res: AxiosResponse) => {
-        // Get labels
-        // Call this.createLabels
+        if (res.status >= 400) {
+            alert("Error generating labels; please try again.");
+        }
+        let labels: Array<LabelData>;
+        if (labels = res.data["labels"]) {
+            const labelInfos = labels.map((label: LabelData) => {
+                return new LabelInfo(this.timeToPosition(label.start * 1000), label.label);
+            });
+            this.createLabels(labelInfos);
+        }
     }
 
     // MARK: Label creation and related methods
